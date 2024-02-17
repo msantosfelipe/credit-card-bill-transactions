@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  credit_card_reader_mongo:
+    container_name: credit_card_reader_mongo
+    image: bitnami/mongodb:5.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    volumes:
+      - ./data:/data/db
