@@ -1,10 +1,13 @@
-# Credit card bill updater
+# Credit card bill reader/uploader
 
-Read credit card bills and store in a MongoDB
-- Actually it only imports C6 bank csv files
+- Work in progress...
 
+### Uploader
+Subdirectory ./credit-card-uploader
 
-Mongo URI: mongodb://localhost:27017/credit_card_reader_mongo
+Python script to upload data
 
+### Reader
+Subdirectory ./credit-card-reader
 
-
+Golang service to read data

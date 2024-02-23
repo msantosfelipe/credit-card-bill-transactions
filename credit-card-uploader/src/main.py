@@ -41,7 +41,10 @@ def read_csv_and_insert_mongodb(bank, csv_file_path):
 def read_c6(csv_file_path, file_date):
     df = pd.read_csv(csv_file_path, sep=';')
     data = df.to_dict(orient='records')
-    document = {file_date: data}
+    document = {
+        "file_date" : file_date,
+        "data" : data
+    }
     return document
 
 def extract_date(csv_file_path):
