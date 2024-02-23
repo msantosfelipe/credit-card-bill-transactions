@@ -1,6 +1,8 @@
 package domain
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+)
 
 // Structs definitions
 
@@ -34,12 +36,12 @@ type CategoryBill struct {
 
 // Usecase definitions
 type BillTransactionsUsecase interface {
-	GetRecentBill(ctx *gin.Context, bank string) (*Bill, error)
-	GetInstallmentTransactions(ctx *gin.Context, bank string) (*Bill, error)
-	GetTransactionsByCategory(ctx *gin.Context, bank string) (*CategoriesBill, error)
+	GetRecentBill(bank string) (*Bill, error)
+	GetInstallmentTransactions(bank string) (*Bill, error)
+	GetTransactionsByCategory(bank string) (*CategoriesBill, error)
 }
 
 // Repository definitions
 type BillTransactionsRepository interface {
-	QueryRecentBill(ctx *gin.Context, bank string) (*Bill, error)
+	QueryRecentBill(ctx context.Context, bank string) (*Bill, error)
 }

@@ -1,7 +1,8 @@
 package db
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+
 	"github.com/msantosfelipe/credit-card-reader/config"
 	"github.com/msantosfelipe/credit-card-reader/domain"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,7 +22,7 @@ func (repo *repository) getCollection(bank string) *mongo.Collection {
 	return repo.dbClient.Database(config.ENV.DbName).Collection(bank)
 }
 
-func (repo *repository) QueryRecentBill(ctx *gin.Context, bank string) (*domain.Bill, error) {
+func (repo *repository) QueryRecentBill(ctx context.Context, bank string) (*domain.Bill, error) {
 	options := options.FindOne().SetSort(bson.D{{Key: "file_date", Value: -1}})
 
 	var result domain.Bill

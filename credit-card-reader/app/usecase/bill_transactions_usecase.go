@@ -1,7 +1,9 @@
 package usecase
 
 import (
-	"github.com/gin-gonic/gin"
+	"context"
+	"time"
+
 	"github.com/msantosfelipe/credit-card-reader/domain"
 )
 
@@ -13,11 +15,17 @@ func NewUsecase(repository domain.BillTransactionsRepository) domain.BillTransac
 	return &usecase{repository: repository}
 }
 
-func (us *usecase) GetRecentBill(ctx *gin.Context, bank string) (*domain.Bill, error) {
+func (us *usecase) GetRecentBill(bank string) (*domain.Bill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	return us.repository.QueryRecentBill(ctx, bank)
 }
 
-func (us *usecase) GetInstallmentTransactions(ctx *gin.Context, bank string) (*domain.Bill, error) {
+func (us *usecase) GetInstallmentTransactions(bank string) (*domain.Bill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	recentBill, err := us.repository.QueryRecentBill(ctx, "")
 	if err != nil {
 		return nil, err
@@ -35,7 +43,10 @@ func (us *usecase) GetInstallmentTransactions(ctx *gin.Context, bank string) (*d
 	return &installments, nil
 }
 
-func (us *usecase) GetTransactionsByCategory(ctx *gin.Context, bank string) (*domain.CategoriesBill, error) {
+func (us *usecase) GetTransactionsByCategory(bank string) (*domain.CategoriesBill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	recentBill, err := us.repository.QueryRecentBill(ctx, "")
 	if err != nil {
 		return nil, err

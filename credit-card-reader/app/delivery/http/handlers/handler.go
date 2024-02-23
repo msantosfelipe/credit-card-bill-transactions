@@ -22,7 +22,7 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 }
 
 func (handler *handler) getRecentBill(ctx *gin.Context) {
-	recentBill, err := handler.us.GetRecentBill(ctx, "c6")
+	recentBill, err := handler.us.GetRecentBill("c6")
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
@@ -32,7 +32,7 @@ func (handler *handler) getRecentBill(ctx *gin.Context) {
 }
 
 func (handler *handler) getInstallmentTransactions(ctx *gin.Context) {
-	transactions, err := handler.us.GetInstallmentTransactions(ctx, "c6")
+	transactions, err := handler.us.GetInstallmentTransactions("c6")
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
@@ -42,7 +42,7 @@ func (handler *handler) getInstallmentTransactions(ctx *gin.Context) {
 }
 
 func (handler *handler) getTransactionsByCategory(ctx *gin.Context) {
-	categories, err := handler.us.GetTransactionsByCategory(ctx, "c6")
+	categories, err := handler.us.GetTransactionsByCategory("c6")
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
