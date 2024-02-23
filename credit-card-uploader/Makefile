@@ -5,7 +5,10 @@ stop-db:
 	docker-compose stop
 
 run-script:
-	python3 src/main.py
+	python3 src/process_import.py
+
+run-tag:
+	python3 src/process_tag.py
 
 create-venv:
 	python3 -m venv credit-card-uploader-venv
