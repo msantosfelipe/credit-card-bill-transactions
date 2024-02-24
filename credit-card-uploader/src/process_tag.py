@@ -1,73 +1,22 @@
-from pymongo import DESCENDING
 import db_helper
+import process_tag_c6
 
-def process_tag(bank):
-    collection = db_helper.getCollection(bank)
-    most_recent_bill = collection.find_one({}, sort=[('file_date', DESCENDING)])
-    transactions = most_recent_bill['data']
+c6 = 'c6'
 
-    counter = 0
-    totalTransactions = len(transactions)
-    doManual = input('Do manual processment? (Y/n) ')
-    for transaction in transactions:
-        counter+=1
-        if transaction.get('tag', '') != '':
-            continue
+def process_tag_from_import(bank_name, collection, file_date):
+    print(f'[INFO] Starting tag process')
 
-        customProcessment(counter, transaction)
-        
-        if doManual == 'Y' or doManual == 'y':
-            manualProcessment(counter, transaction, totalTransactions)
-
-    updateCollection(transactions, collection, most_recent_bill['_id'])
-    print('[INFO] All tags updated!')
-
-def customProcessment(counter, transaction):
-    tagIfood(counter, transaction)
-    tag99(counter, transaction)
-    tagSubscriptions(counter, transaction)
-
-def tagIfood(counter, transaction):
-    label = 'Ifood'
-    description = transaction['Descrição']
-    value = transaction['Valor (em R$)']
-    if 'IFOOD' in description:
-        transaction['tag'] = label
-        print(f'Transaction #{counter} tagged with {label} - {description} / R${value}')
-
-def tag99(counter, transaction):
-    label = '99'
-    substrings = ['99APP', '99*']
-    description = transaction['Descrição']
-    value = transaction['Valor (em R$)']
-    if any(substring in description for substring in substrings):
-        transaction['tag'] = label
-        print(f'Transaction #{counter} tagged with {label} - {description} / R${value}')
-
-def tagSubscriptions(counter, transaction):
-    label = 'Subscription'
-    substrings = ['ALPHA FITNESS', 'SOCIO ESQUAD', 'NETFLIX', 'DGOSKY', 'LIVELO', 'SPOTIFY', 'GOOGLE YOUTUBE MEMBER', 'SERASA', 'PRODUTOS GLOBO']
-    description = transaction['Descrição']
-    value = transaction['Valor (em R$)']
-    if any(substring in description for substring in substrings):
-        transaction['tag'] = label
-        print(f'Transaction #{counter} tagged with {label} - {description} / R${value}')
-
-def manualProcessment(counter, transaction, totalTransactions):
-    print('-----------------------------------------------------')
-    print(f'Transaction {counter} of {totalTransactions}')
-    print(transaction)
-    tag = input('Enter a new tag for this transaction: ')
-    transaction['tag'] = tag
-    return
-
-def updateCollection(transactions, collection, id):
-    update = {
-            '$set': {
-                'data': transactions,
-            }
-        }
-    collection.update_one({'_id': id}, update)
+    if bank_name == c6:
+        query = {'file_date': file_date}
+        bill = collection.find_one(query)
+        process_tag_c6.process_tag(bill, collection, False)
+    else:
+        print(f'[ERROR] Invalid bank_name: {bank_name}')
+        return None
 
 if __name__ == '__main__':
-    process_tag('c6')
+    doManual = input('Do manual processment? (Y/n) ')
+    collection = db_helper.getCollection(c6)
+    all_documents = collection.find()
+    for document in all_documents:
+        process_tag_c6.process_tag(document, collection, doManual)    

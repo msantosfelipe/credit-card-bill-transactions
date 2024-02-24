@@ -1,61 +1,56 @@
-from datetime import datetime
 import os
-import pandas as pd
 import shutil
-import db_helper 
+import db_helper
+import process_tag
+import process_import_c6
+from datetime import datetime
 
 input_folder = "src/input/"
 output_folder = "src/processed/"
+c6 = 'c6'
 
-def read_csv_and_insert_mongodb(bank, csv_file_path):
-    collection = db_helper.getCollection(bank)
+def read_csv_and_insert_mongodb(bank_name, csv_file_path):
+    print(f'**************************************')
+    print(f'[INFO] Processing file {csv_file_path}')
+    collection = db_helper.getCollection(bank_name)
     control_collection = db_helper.getCollection(db_helper.mongo_upload_collection)
 
-    file_date = extract_date(csv_file_path)
-    document = control_collection.find_one({'file_date': file_date})
-    if document:
-        print(f'[WARN] File from bank {bank} and date {file_date} already exists')
-        return
+    if bank_name == c6:
+        # C6 csv import
+        file_date = process_import_c6.extract_date(csv_file_path)
+        document = control_collection.find_one({'file_date': file_date})
+        if document:
+            print(f'[WARN] File from bank_name {bank_name} and date {file_date} already exists')
+            return
+        result = process_import_c6.read_csv(csv_file_path, file_date)
 
-    result = read_c6(csv_file_path, file_date)
+    else:
+        print(f'[ERROR] Invalid bank_name: {bank_name}')
+        return None
 
+    insertOnDb(collection, control_collection, csv_file_path, file_date, result)
+    process_tag.process_tag_from_import(bank_name, collection, file_date)
+
+    print(f'[INFO] Data from {csv_file_path} successfully processed!')
+
+def insertOnDb(collection, control_collection, csv_file_path, file_date, result):
     collection.insert_one(result)
     control_collection.insert_one({
                     'file_name': csv_file_path,
-                    'bank': collection.name,
+                    'bank_name': collection.name,
                     'file_date': file_date,
                     'import_date': datetime.now()
                 })
-    print(f'[INFO] Data from {csv_file_path} imported to MongoDB!')
-
-def read_c6(csv_file_path, file_date):
-    df = pd.read_csv(csv_file_path, sep=';')
-    data = df.to_dict(orient='records')
-    document = {
-        "file_date" : file_date,
-        "data" : data
-    }
-    return document
-
-def extract_date(csv_file_path):
-    try:
-        date = csv_file_path.split('_')[1].split('.csv')[0]
-        date_object = datetime.strptime(date, '%Y-%m-%d')
-        month = date_object.strftime('%m')
-        year = date_object.year
-        return f'{year}-{month}'
-    except Exception as e:
-        print(f'[ERROR] Failed extracting date: {e}')
-        return None
+    print(f'[INFO] Data saved to database!')
 
 def process_files_in_directory(directory):
     for root, _, files in os.walk(directory):
         for filename in files:
             if filename.endswith('.csv'):
                 csv_file_path = os.path.join(root, filename)
-                bank = os.path.basename(os.path.dirname(csv_file_path))
-                read_csv_and_insert_mongodb(bank, csv_file_path)
-                #move_processed_file(csv_file_path)
+                bank_name = os.path.basename(os.path.dirname(csv_file_path))
+                read_csv_and_insert_mongodb(bank_name, csv_file_path)
+                #move_processed_file(csv_file_path)  # UNCOMMENT THIS LINE
     print('[INFO] All files imported!')
 
 def move_processed_file(file_path):

@@ -4,8 +4,8 @@ db:
 db-stop:
 	cd credit-card-uploader/ && make stop-db
 
-run-script:
-	cd credit-card-uploader/ && make run-script
+import:
+	cd credit-card-uploader/ && make import
 
-start:
+reader:
 	cd credit-card-reader/ && go run .

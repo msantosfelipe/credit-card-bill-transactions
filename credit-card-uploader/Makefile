@@ -4,10 +4,10 @@ start-db:
 stop-db:
 	docker-compose stop
 
-run-script:
+import:
 	python3 src/process_import.py
 
-run-tag:
+tag:
 	python3 src/process_tag.py
 
 create-venv:
