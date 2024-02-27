@@ -16,6 +16,7 @@ type Transaction struct {
 	Cardholder   string  `json:"cardholder,omitempty" bson:"Nome no Cartão,omitempty"`
 	CardDigits   int     `json:"card_digits,omitempty" bson:"Final do Cartão,omitempty"`
 	Category     string  `json:"category,omitempty" bson:"Categoria,omitempty"`
+	Tag          string  `json:"tag,omitempty" bson:"tag,omitempty"`
 	Description  string  `json:"description,omitempty" bson:"Descrição,omitempty"`
 	Installment  string  `json:"installment,omitempty" bson:"Parcela,omitempty"`
 	AmountUSD    float64 `json:"amount_usd,omitempty" bson:"Valor (em US$),omitempty"`
@@ -29,7 +30,8 @@ type CategoriesBill struct {
 }
 
 type CategoryBill struct {
-	Category     string        `json:"category"`
+	Category     string        `json:"category,omitempty"`
+	Tag          string        `json:"tag,omitempty"`
 	Amount       float32       `json:"amount"`
 	Transactions []Transaction `json:"transactions"`
 }
@@ -39,6 +41,7 @@ type BillTransactionsUsecase interface {
 	GetRecentBill(bank string) (*Bill, error)
 	GetInstallmentTransactions(bank string) (*Bill, error)
 	GetTransactionsByCategory(bank string) (*CategoriesBill, error)
+	GetTransactionsByTag(bank string) (*CategoriesBill, error)
 }
 
 // Repository definitions

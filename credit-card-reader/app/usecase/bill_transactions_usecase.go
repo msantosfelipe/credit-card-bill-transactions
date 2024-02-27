@@ -26,7 +26,7 @@ func (us *usecase) GetInstallmentTransactions(bank string) (*domain.Bill, error)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	recentBill, err := us.repository.QueryRecentBill(ctx, "")
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (us *usecase) GetTransactionsByCategory(bank string) (*domain.CategoriesBil
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	recentBill, err := us.repository.QueryRecentBill(ctx, "")
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
 	if err != nil {
 		return nil, err
 	}
@@ -72,9 +72,47 @@ func (us *usecase) GetTransactionsByCategory(bank string) (*domain.CategoriesBil
 	return &categories, err
 }
 
+func (us *usecase) GetTransactionsByTag(bank string) (*domain.CategoriesBill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
+	if err != nil {
+		return nil, err
+	}
+
+	tags := domain.CategoriesBill{
+		FileDate: recentBill.FileDate,
+	}
+	for _, i := range recentBill.Data {
+		exists, idx := tagExists(i.Tag, tags.Data)
+		if exists {
+			tags.Data[idx].Transactions = append(tags.Data[idx].Transactions, i)
+			tags.Data[idx].Amount += float32(i.AmountBRL)
+		} else {
+			tags.Data = append(tags.Data, domain.CategoryBill{
+				Tag:          i.Tag,
+				Amount:       float32(i.AmountBRL),
+				Transactions: []domain.Transaction{i},
+			})
+		}
+	}
+
+	return &tags, err
+}
+
 func categoryExists(category string, data []domain.CategoryBill) (bool, int) {
 	for idx, i := range data {
 		if i.Category == category {
+			return true, idx
+		}
+	}
+	return false, 0
+}
+
+func tagExists(tag string, data []domain.CategoryBill) (bool, int) {
+	for idx, i := range data {
+		if i.Tag == tag {
 			return true, idx
 		}
 	}
