@@ -11,6 +11,12 @@ type Bill struct {
 	Data     []Transaction `json:"data" bson:"data,omitempty"`
 }
 
+type Installment struct {
+	FileDate string        `json:"month" bson:"file_date,omitempty"`
+	Amount   float64       `json:"amount"`
+	Data     []Transaction `json:"data" bson:"data,omitempty"`
+}
+
 type Transaction struct {
 	PurchaseDate string  `json:"purchase_date,omitempty" bson:"Data de Compra,omitempty"`
 	Cardholder   string  `json:"cardholder,omitempty" bson:"Nome no Cartão,omitempty"`
@@ -32,19 +38,31 @@ type CategoriesBill struct {
 type CategoryBill struct {
 	Category     string        `json:"category,omitempty"`
 	Tag          string        `json:"tag,omitempty"`
-	Amount       float32       `json:"amount"`
+	Amount       float64       `json:"amount"`
 	Transactions []Transaction `json:"transactions"`
+}
+
+type ReportByTag struct {
+	Tag    string   `json:"tag"`
+	Report []Report `json:"report"`
+}
+
+type Report struct {
+	FileDate string  `json:"date"`
+	Amount   float64 `json:"amount"`
 }
 
 // Usecase definitions
 type BillTransactionsUsecase interface {
 	GetRecentBill(bank string) (*Bill, error)
-	GetInstallmentTransactions(bank string) (*Bill, error)
+	GetInstallmentTransactions(bank string) (*Installment, error)
 	GetTransactionsByCategory(bank string) (*CategoriesBill, error)
 	GetTransactionsByTag(bank string) (*CategoriesBill, error)
+	GetReportByTag(bank string) ([]ReportByTag, error)
 }
 
 // Repository definitions
 type BillTransactionsRepository interface {
-	QueryRecentBill(ctx context.Context, bank string) (*Bill, error)
+	QueryRecentBill(ctx context.Context, bank string, returnPayment bool) (*Bill, error)
+	QueryAllBills(ctx context.Context, bank string) ([]Bill, error)
 }

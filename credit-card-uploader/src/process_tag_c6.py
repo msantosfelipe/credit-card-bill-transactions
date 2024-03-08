@@ -24,6 +24,7 @@ def customProcessment(counter, transaction):
     tagTransaction(counter, transaction, tags.tag99.items())
     tagTransaction(counter, transaction, tags.tagIfood.items())
     tagTransaction(counter, transaction, tags.tagSubscriptions.items())
+    tagTransaction(counter, transaction, tags.tagMarket.items())
 
 def tagTransaction(counter, transaction, tags):
     description = transaction['Descrição']

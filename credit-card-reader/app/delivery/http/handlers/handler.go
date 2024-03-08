@@ -20,6 +20,7 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 	router.GET("/installments", handler.getInstallmentTransactions)
 	router.GET("/categories", handler.getTransactionsByCategory)
 	router.GET("/tags", handler.getTransactionsByTag)
+	router.GET("/report/tag", handler.getReportByTag)
 }
 
 func (handler *handler) getRecentBill(ctx *gin.Context) {
@@ -60,4 +61,14 @@ func (handler *handler) getTransactionsByTag(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, categories)
+}
+
+func (handler *handler) getReportByTag(ctx *gin.Context) {
+	reports, err := handler.us.GetReportByTag("c6")
+	if err != nil {
+		println(err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
+		return
+	}
+	ctx.JSON(http.StatusOK, reports)
 }
