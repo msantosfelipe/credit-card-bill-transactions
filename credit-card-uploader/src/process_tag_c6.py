@@ -1,6 +1,4 @@
-import tags
-
-def process_tag(bill, collection, doManual):
+def process_tag(bill, collection, tags_dict, doManual):    
     transactions = bill['data']
 
     counter = 0
@@ -11,7 +9,7 @@ def process_tag(bill, collection, doManual):
         if transaction.get('tag', '') != '':
             continue
 
-        customProcessment(counter, transaction)
+        customProcessment(counter, transaction, tags_dict)
         
         if doManual == 'Y' or doManual == 'y':
             manualProcessment(counter, transaction, totalTransactions)
@@ -19,20 +17,21 @@ def process_tag(bill, collection, doManual):
     updateCollection(transactions, collection, bill['_id'])
     print('[INFO] All tags updated!')
 
-def customProcessment(counter, transaction):
-    tagTransaction(counter, transaction, tags.tagUber.items())
-    tagTransaction(counter, transaction, tags.tag99.items())
-    tagTransaction(counter, transaction, tags.tagIfood.items())
-    tagTransaction(counter, transaction, tags.tagSubscriptions.items())
-    tagTransaction(counter, transaction, tags.tagMarket.items())
+def customProcessment(counter, transaction, tags_dict):
+    for label, tags in tags_dict.items():
+        tagTransaction(counter, transaction, label, tags)
+    #tagTransaction(counter, transaction, tags.tagUber.items())
+    #tagTransaction(counter, transaction, tags.tag99.items())
+    #tagTransaction(counter, transaction, tags.tagIfood.items())
+    #tagTransaction(counter, transaction, tags.tagSubscriptions.items())
+    #tagTransaction(counter, transaction, tags.tagMarket.items())
 
-def tagTransaction(counter, transaction, tags):
+def tagTransaction(counter, transaction, label, tags):
     description = transaction['Descrição']
     value = transaction['Valor (em R$)']
-    for label, substrings in tags:
-        if any(substring in description for substring in substrings):
-            transaction['tag'] = label
-            print(f'Transaction #{counter} tagged with {label} - {description} / R${value}')
+    if any(substring in description for substring in tags):
+        transaction['tag'] = label
+        print(f'Transaction #{counter} tagged with {label} - {description} / R${value}')
 
 def manualProcessment(counter, transaction, totalTransactions):
     print('-----------------------------------------------------')

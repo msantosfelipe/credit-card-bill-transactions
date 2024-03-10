@@ -12,9 +12,10 @@ c6 = 'c6'
 def read_csv_and_insert_mongodb(bank_name, csv_file_path):
     print(f'**************************************')
     print(f'[INFO] Processing file {csv_file_path}')
-    collection = db_helper.getCollection(bank_name)
-    control_collection = db_helper.getCollection(db_helper.mongo_upload_collection)
-
+    dbClient = db_helper.getDbClient()
+    collection = dbClient[bank_name]
+    control_collection = dbClient[db_helper.mongo_collection_uploads]
+    
     if bank_name == c6:
         # C6 csv import
         file_date = process_import_c6.extract_date(csv_file_path)
@@ -29,7 +30,7 @@ def read_csv_and_insert_mongodb(bank_name, csv_file_path):
         return None
 
     insertOnDb(collection, control_collection, csv_file_path, file_date, result)
-    process_tag.process_tag_from_import(bank_name, collection, file_date)
+    process_tag.process_tag_from_import(bank_name, collection, process_tag.getTags(dbClient), file_date)
 
     print(f'[INFO] Data from {csv_file_path} successfully processed!')
 
