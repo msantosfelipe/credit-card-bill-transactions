@@ -7,8 +7,9 @@ import (
 // Structs definitions
 
 type Bill struct {
-	FileDate string        `json:"month" bson:"file_date,omitempty"`
-	Data     []Transaction `json:"data" bson:"data,omitempty"`
+	FileDate    string        `json:"month" bson:"file_date,omitempty"`
+	TotalAmount float64       `json:"total_amount"`
+	Data        []Transaction `json:"data" bson:"data,omitempty"`
 }
 
 type Installment struct {
@@ -63,6 +64,6 @@ type BillTransactionsUsecase interface {
 
 // Repository definitions
 type BillTransactionsRepository interface {
-	QueryRecentBill(ctx context.Context, bank string, returnPayment bool) (*Bill, error)
+	QueryRecentBill(ctx context.Context, bank string) (*Bill, error)
 	QueryAllBills(ctx context.Context, bank string) ([]Bill, error)
 }

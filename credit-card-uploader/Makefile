@@ -1,9 +1,3 @@
-start-db:
-	docker-compose up -d
-
-stop-db:
-	docker-compose stop
-
 import:
 	python3 src/process_import.py
 

@@ -25,7 +25,7 @@ func (repo *repository) getCollection(bank string) *mongo.Collection {
 	return repo.dbClient.Database(config.ENV.DbName).Collection(bank)
 }
 
-func (repo *repository) QueryRecentBill(ctx context.Context, bank string, returnPayment bool) (*domain.Bill, error) {
+func (repo *repository) QueryRecentBill(ctx context.Context, bank string) (*domain.Bill, error) {
 	sortOptions := options.FindOne().SetSort(bson.D{{Key: "file_date", Value: -1}})
 
 	var result domain.Bill
@@ -34,11 +34,15 @@ func (repo *repository) QueryRecentBill(ctx context.Context, bank string, return
 		return nil, err
 	}
 
-	if returnPayment {
-		return &result, nil
+	for i := 0; i < len(result.Data); i++ {
+		if strings.TrimSpace(result.Data[i].Description) == C6_PAYMENT {
+			result.Data = append(result.Data[:i], result.Data[i+1:]...)
+			i--
+		}
+		result.TotalAmount += result.Data[i].AmountBRL
 	}
 
-	return removePayment(result), nil
+	return &result, nil
 }
 
 func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domain.Bill, error) {

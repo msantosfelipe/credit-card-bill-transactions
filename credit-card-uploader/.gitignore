@@ -1,4 +1,4 @@
-src/input/c6/
-src/processed/
+src/input/c6/*
+src/processed/*
 credit-card-uploader-venv/
 __pycache__

@@ -20,14 +20,14 @@ func (us *usecase) GetRecentBill(bank string) (*domain.Bill, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	return us.repository.QueryRecentBill(ctx, bank, false)
+	return us.repository.QueryRecentBill(ctx, bank)
 }
 
 func (us *usecase) GetInstallmentTransactions(bank string) (*domain.Installment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank, false)
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (us *usecase) GetTransactionsByCategory(bank string) (*domain.CategoriesBil
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank, false)
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (us *usecase) GetTransactionsByTag(bank string) (*domain.CategoriesBill, er
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank, false)
+	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
 	if err != nil {
 		return nil, err
 	}
