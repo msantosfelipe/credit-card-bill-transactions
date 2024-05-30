@@ -11,3 +11,11 @@ Python script to upload data
 Subdirectory ./credit-card-reader
 
 Golang service to read data
+
+### Viewer
+Subdirectory ./credit-card-viewer
+
+React + ChartsJS
+
+Refs:
+https://blog.logrocket.com/using-chart-js-react/
