@@ -16,6 +16,26 @@ func NewUsecase(repository domain.BillTransactionsRepository) domain.BillTransac
 	return &usecase{repository: repository}
 }
 
+func (us *usecase) GetAllBills(banks []string) ([]domain.Bills, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	billsAmounts := []domain.Bills{}
+	for _, bank := range banks {
+		bills, err := us.repository.QueryAllBills(ctx, bank)
+		if err != nil {
+			return nil, err
+		}
+
+		billsAmounts = append(billsAmounts, domain.Bills{
+			Bank:  bank,
+			Bills: bills,
+		})
+	}
+
+	return billsAmounts, nil
+}
+
 func (us *usecase) GetRecentBill(bank string) (*domain.Bill, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

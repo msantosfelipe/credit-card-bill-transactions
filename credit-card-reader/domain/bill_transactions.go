@@ -6,6 +6,11 @@ import (
 
 // Structs definitions
 
+type Bills struct {
+	Bank  string `json:"bank"`
+	Bills []Bill `json:"bills"`
+}
+
 type Bill struct {
 	FileDate    string        `json:"month" bson:"file_date,omitempty"`
 	TotalAmount float64       `json:"total_amount"`
@@ -55,6 +60,7 @@ type Report struct {
 
 // Usecase definitions
 type BillTransactionsUsecase interface {
+	GetAllBills(banks []string) ([]Bills, error)
 	GetRecentBill(bank string) (*Bill, error)
 	GetInstallmentTransactions(bank string) (*Installment, error)
 	GetTransactionsByCategory(bank string) (*CategoriesBill, error)

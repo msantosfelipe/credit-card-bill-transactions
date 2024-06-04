@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"math"
 	"strings"
 
 	"github.com/msantosfelipe/credit-card-reader/config"
@@ -34,13 +35,7 @@ func (repo *repository) QueryRecentBill(ctx context.Context, bank string) (*doma
 		return nil, err
 	}
 
-	for i := 0; i < len(result.Data); i++ {
-		if strings.TrimSpace(result.Data[i].Description) == C6_PAYMENT {
-			result.Data = append(result.Data[:i], result.Data[i+1:]...)
-			i--
-		}
-		result.TotalAmount += result.Data[i].AmountBRL
-	}
+	result.TotalAmount = calcTotalAmount(result.Data)
 
 	return &result, nil
 }
@@ -59,6 +54,11 @@ func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domai
 		return nil, err
 	}
 
+	for i := range results {
+		results[i].TotalAmount = calcTotalAmount(results[i].Data)
+		results[i].Data = nil // TODO add param to verify data return
+	}
+
 	return results, nil
 }
 
@@ -70,4 +70,18 @@ func removePayment(result domain.Bill) *domain.Bill {
 		}
 	}
 	return &result
+}
+
+func calcTotalAmount(data []domain.Transaction) float64 {
+	totalAmount := 0.0
+	for _, d := range data {
+		if !(strings.TrimSpace(d.Description) == C6_PAYMENT) {
+			totalAmount += d.AmountBRL
+		}
+	}
+	return roundToTwoDecimalPlaces(totalAmount)
+}
+
+func roundToTwoDecimalPlaces(val float64) float64 {
+	return math.Round(val*100) / 100
 }

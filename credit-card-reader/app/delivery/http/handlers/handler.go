@@ -17,6 +17,7 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 	}
 
 	router.GET("/bill", handler.getRecentBill)
+	router.GET("/bills", handler.getAllBills)
 	router.GET("/installments", handler.getInstallmentTransactions)
 	router.GET("/categories", handler.getTransactionsByCategory)
 	router.GET("/tags", handler.getTransactionsByTag)
@@ -24,6 +25,8 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 }
 
 func (handler *handler) getRecentBill(ctx *gin.Context) {
+	// TODO add month parameter
+
 	recentBill, err := handler.us.GetRecentBill("c6")
 	if err != nil {
 		println(err.Error())
@@ -31,6 +34,16 @@ func (handler *handler) getRecentBill(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, recentBill)
+}
+
+func (handler *handler) getAllBills(ctx *gin.Context) {
+	bills, err := handler.us.GetAllBills([]string{"c6"})
+	if err != nil {
+		println(err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
+		return
+	}
+	ctx.JSON(http.StatusOK, bills)
 }
 
 func (handler *handler) getInstallmentTransactions(ctx *gin.Context) {

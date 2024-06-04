@@ -1,7 +1,7 @@
 import './App.css';
 import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Data } from "./utils/Data";
 import PieChart from "./components/PieChart";
 
@@ -10,6 +10,8 @@ Chart.register(CategoryScale);
 const endpoint = 'http://localhost:8080/credit-card-reader/'
 
 export default function App() {
+  
+
   const [chartData, setChartData] = useState({
     labels: Data.map((data) => data.year), 
     datasets: [
@@ -28,10 +30,26 @@ export default function App() {
       }
     ]
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const billsAmounts = await fetch(endpoint + 'bills');
+      const billsAmountsData = await billsAmounts.json();
+      console.log(billsAmountsData)
+    };
+    fetchData();
+  }, []);
  
   return (
     <div className="App">
-      <PieChart chartData={chartData} />
+      <h1>Gastos no Cartão de Crédito</h1>
+      <details>
+      <summary>Gastos Mensais</summary>
+      <div style={{ width: '600px', margin: '0 auto' }}>
+        <h2>Gastos Mensais</h2>
+        <PieChart chartData={chartData} />
+      </div>
+      </details>
     </div>
   );
 }
