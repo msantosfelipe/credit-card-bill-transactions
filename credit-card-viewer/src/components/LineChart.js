@@ -1,8 +1,9 @@
-// components/BarChart.js
-import { Bar } from "react-chartjs-2";
+// components/LineChart.js
+import { Line } from "react-chartjs-2";
 
-function BarChart({ chartData }) {
+function LineChart({ chartData }) {
   const options = {
+    responsive: true,
     plugins: {
       title: {
         display: false,
@@ -14,9 +15,9 @@ function BarChart({ chartData }) {
   };
   return (
     <div className="chart-container">
-      <Bar data={chartData} options={options} />
+      <Line data={chartData} options={options} />
     </div>
   );
 };
 
-export default BarChart;
+export default LineChart;

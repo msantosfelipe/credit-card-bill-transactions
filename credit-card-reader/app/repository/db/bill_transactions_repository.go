@@ -56,7 +56,6 @@ func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domai
 
 	for i := range results {
 		results[i].TotalAmount = calcTotalAmount(results[i].Data)
-		results[i].Data = nil // TODO add param to verify data return
 	}
 
 	return results, nil
