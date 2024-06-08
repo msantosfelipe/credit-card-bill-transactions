@@ -9,6 +9,7 @@ import ReportByTag from '../ReportByTag';
 import useReportByTagData from '../../hooks/useReportByTagData';
 
 const CreditCards = () => {
+    //const recentBillData = useRecentBillData();
     const billsData = useBillsData();
     const installmentsData = useInstallmentsData();
     const reportData = useReportByTagData();

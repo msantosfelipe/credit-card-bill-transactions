@@ -18,7 +18,6 @@ const useBillsData = () => {
             try {
                 const billsAmounts = await fetch(endpoint + 'bills');
                 const billsAmountsData = await billsAmounts.json();
-
                 const transformedData = transformData(billsAmountsData);
                 setBillsData(transformedData);
             } catch (error) {
