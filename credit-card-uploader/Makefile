@@ -2,10 +2,10 @@ DB_NAME=credit_card_reader_mongo
 
 CONTAINER_NAME=credit_card_reader_mongo
 
-upload: drop-collections, insert-tags
+upload: drop-collections insert-tags
 	python3 src/process_upload.py
 
-tag: drop-collections, insert-tags
+tag: drop-collections insert-tags
 	python3 src/process_tag.py
 
 create-venv:
