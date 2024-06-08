@@ -1,4 +1,4 @@
-src/tags.json
+src/tags*
 src/input/c6/*
 src/processed/*
 credit-card-uploader-venv/
