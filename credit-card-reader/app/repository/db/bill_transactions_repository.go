@@ -13,6 +13,7 @@ import (
 )
 
 const C6_PAYMENT = "Pagamento Efetuado"
+const C6_PAYMENT_INCLUDED = "Inclusao de Pagamento"
 
 type repository struct {
 	dbClient *mongo.Client
@@ -37,7 +38,7 @@ func (repo *repository) QueryRecentBill(ctx context.Context, bank string) (*doma
 
 	result.TotalAmount = calcTotalAmount(result.Data)
 
-	return &result, nil
+	return removePayment(result), nil
 }
 
 func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domain.Bill, error) {
@@ -56,6 +57,7 @@ func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domai
 
 	for i := range results {
 		results[i].TotalAmount = calcTotalAmount(results[i].Data)
+		results[i] = *removePayment(results[i])
 	}
 
 	return results, nil
@@ -63,7 +65,7 @@ func (repo *repository) QueryAllBills(ctx context.Context, bank string) ([]domai
 
 func removePayment(result domain.Bill) *domain.Bill {
 	for i := 0; i < len(result.Data); i++ {
-		if strings.TrimSpace(result.Data[i].Description) == C6_PAYMENT {
+		if strings.TrimSpace(result.Data[i].Description) == C6_PAYMENT || strings.TrimSpace(result.Data[i].Description) == C6_PAYMENT_INCLUDED {
 			result.Data = append(result.Data[:i], result.Data[i+1:]...)
 			i--
 		}

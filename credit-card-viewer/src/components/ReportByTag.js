@@ -1,10 +1,8 @@
 // src/components/ReportByTag.js
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
-import useReportByTagData from '../hooks/useReportByTagData';
 
-const ReportByTag = () => {
-  const reportData = useReportByTagData();
+const ReportByTag = ({ data }) => {
 
   const generateChartData = (report) => {
     const labels = report.map(item => item.date);
@@ -26,8 +24,8 @@ const ReportByTag = () => {
 
   return (
     <div className="container">
-      {reportData?.length > 0 ? (
-        reportData.map((item, index) => (
+      {data?.length > 0 ? (
+        data.map((item, index) => (
           <div key={index} className="my-4">
             <details>
               <summary>{item.tag}</summary>

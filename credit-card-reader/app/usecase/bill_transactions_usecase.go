@@ -146,6 +146,10 @@ func (us *usecase) GetReportByTag(bank string) ([]domain.ReportByTag, error) {
 	var report []domain.ReportByTag
 	for _, b := range bills {
 		for _, t := range b.Data {
+			if t.Category == "-" {
+				continue
+			}
+
 			if t.Tag == "" {
 				t.Tag = t.Category
 			}

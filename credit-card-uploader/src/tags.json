@@ -19,25 +19,77 @@
         ]
     },
     {
-        "name": "Subscriptions",
+        "name": "Assinaturas",
         "keywords": [
             "ALPHA FITNESS",
             "SOCIO ESQUAD",
             "NETFLIX",
+            "SKYMAIS",
             "DGOSKY",
+            "DIRECTVGO",
             "LIVELO",
             "SPOTIFY",
             "GOOGLE YOUTUBE MEMBER",
             "SERASA",
             "PRODUTOS GLOBO",
-            "SKYMAIS"
+            "GOOGLE STORAGE",
+            "TINDER",
+            "TEMBICI"
         ]
     },
     {
-        "name": "Market",
+        "name": "Mercado",
         "keywords": [
             "HIPERIDEAL",
-            "NOVA BARRA FRIOS"
+            "NOVA BARRA FRIOS",
+            "MIX NETTO SUPERMERCADO",
+            "ASSAI"
+        ]
+    },
+    {
+        "name": "Conta de luz",
+        "keywords": [
+            "COELBA"
+        ]
+    },
+    {
+        "name": "Vestuário / Roupas",
+        "keywords": [
+            "NIKE",
+            "CENTAURO"
+        ]
+    },
+    {
+        "name": "Entretenimento",
+        "keywords": [
+            "TICKETMAKER",
+            "SYMPLA",
+            "ZIGPAY",
+            "ZIG",
+            "TICKETMAIS",
+            "BILHETO",
+            "PARTIK",
+            "ABOCACENTRODEARTE"
+        ]
+    },
+    {
+        "name": "Companhias aéreas",
+        "keywords": [
+            "SMILES",
+            "LATAM",
+            "GOL"
+        ]
+    },
+    {
+        "name": "Outros",
+        "keywords": [
+            "LOTERIAS",
+            "POSTO Z Z STELLA MARIS",
+            "BOXPARK",
+            "UDEMY",
+            "CLARO",
+            "ROYAL CENTER",
+            "ABRIGO DO MARINHEIRO"
         ]
     }
 ]

@@ -6,10 +6,12 @@ import useBillsData from '../../hooks/useBillsData';
 import useInstallmentsData from '../../hooks/useInstallmentsData';
 import InstallmentsTable from '../InstallmentsTable';
 import ReportByTag from '../ReportByTag';
+import useReportByTagData from '../../hooks/useReportByTagData';
 
 const CreditCards = () => {
     const billsData = useBillsData();
     const installmentsData = useInstallmentsData();
+    const reportData = useReportByTagData();
 
     return (
         <div className="App">
@@ -29,7 +31,7 @@ const CreditCards = () => {
                 </details>
                 <details>
                     <summary style={{ textAlign: 'left'}}>Relatório por categoria de compra:</summary>
-                    <ReportByTag />
+                    <ReportByTag data={reportData} />
                 </details>
             </div>
             <div className="container text-center my-5">
