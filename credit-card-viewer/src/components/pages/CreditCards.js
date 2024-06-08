@@ -5,6 +5,7 @@ import BarChart from "../charts/BarChart";
 import useBillsData from '../../hooks/useBillsData';
 import useInstallmentsData from '../../hooks/useInstallmentsData';
 import InstallmentsTable from '../InstallmentsTable';
+import ReportByTag from '../ReportByTag';
 
 const CreditCards = () => {
     const billsData = useBillsData();
@@ -15,16 +16,20 @@ const CreditCards = () => {
             <div className="container">
                 <h1 className="text-center my-4">Gastos no Cartão de Crédito</h1>
                 <details open>
-                    <summary>Histórico de valores das faturas:</summary>
+                    <summary style={{ textAlign: 'left'}}>Histórico de valores das faturas:</summary>
                     <div className="d-flex justify-content-center">
                         <div style={{ width: '1000px' }}>
                             <BarChart chartData={billsData} />
                         </div>
                     </div>
                 </details>
-                <details open>
-                <summary>Contas parceladas:</summary>
+                <details>
+                    <summary style={{ textAlign: 'left'}} >Contas parceladas:</summary>
                     <InstallmentsTable data={installmentsData} />
+                </details>
+                <details>
+                    <summary style={{ textAlign: 'left'}}>Relatório por categoria de compra:</summary>
+                    <ReportByTag />
                 </details>
             </div>
             <div className="container text-center my-5">
