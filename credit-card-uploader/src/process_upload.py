@@ -4,10 +4,11 @@ from db import db_helper
 import process_tag
 from banks.c6 import process_upload_c6
 from datetime import datetime
+import argparse
 
 input_folder = "src/input/"
+sample_folder = "samples/input/"
 output_folder = "src/processed/"
-c6 = 'c6'
 
 def process_files_in_directory(directory):
     for root, _, files in os.walk(directory):
@@ -57,4 +58,10 @@ def move_processed_file(file_path):
     print(f'[INFO] File moved to: {destination_path}')
 
 if __name__ == '__main__':
-    process_files_in_directory(input_folder)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--sample", action="store_true", help="Upload sample data")
+    args = parser.parse_args()
+    if args.sample:
+        process_files_in_directory(sample_folder)
+    else:
+        process_files_in_directory(input_folder)
