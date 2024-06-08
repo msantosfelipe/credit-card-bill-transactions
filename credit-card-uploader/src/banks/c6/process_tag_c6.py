@@ -20,11 +20,6 @@ def process_tag(bill, collection, tags_dict, doManual):
 def customProcessment(counter, transaction, tags_dict):
     for label, tags in tags_dict.items():
         tagTransaction(counter, transaction, label, tags)
-    #tagTransaction(counter, transaction, tags.tagUber.items())
-    #tagTransaction(counter, transaction, tags.tag99.items())
-    #tagTransaction(counter, transaction, tags.tagIfood.items())
-    #tagTransaction(counter, transaction, tags.tagSubscriptions.items())
-    #tagTransaction(counter, transaction, tags.tagMarket.items())
 
 def tagTransaction(counter, transaction, label, tags):
     description = transaction['Descrição']

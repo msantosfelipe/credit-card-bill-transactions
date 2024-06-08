@@ -4,8 +4,11 @@ db:
 db-stop:
 	docker compose stop
 
-import:
-	cd credit-card-uploader/ && make import
+install-requirements:
+	cd credit-card-uploader/ && make install
+
+upload:
+	cd credit-card-uploader/ && make upload
 
 reader:
 	cd credit-card-reader/ && go run .

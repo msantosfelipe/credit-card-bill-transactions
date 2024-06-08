@@ -1,7 +1,11 @@
-import:
-	python3 src/process_import.py
+DB_NAME=credit_card_reader_mongo
 
-tag:
+CONTAINER_NAME=credit_card_reader_mongo
+
+upload: drop-collections, insert-tags
+	python3 src/process_upload.py
+
+tag: drop-collections, insert-tags
 	python3 src/process_tag.py
 
 create-venv:
@@ -21,6 +25,15 @@ install:
 
 # Insert tags in DB
 insert-tags:
-	docker cp src/tags.json credit_card_reader_mongo:/tags.json && \
-	docker exec -it credit_card_reader_mongo mongo credit_card_reader_mongo --eval 'db.tags.drop()' && \
-	docker exec -it credit_card_reader_mongo mongoimport --db credit_card_reader_mongo --collection tags --file /tags.json --jsonArray
+	@if [ -f src/tags.json ]; then \
+		cp src/tags.json src/temp_tags.json; \
+	else \
+		cp samples/tags.json src/temp_tags.json; \
+	fi
+	docker cp src/temp_tags.json $(CONTAINER_NAME):/tags.json && \
+	docker exec -it $(CONTAINER_NAME) mongo $(DB_NAME) --eval 'db.tags.drop()' && \
+	docker exec -it $(CONTAINER_NAME) mongoimport --db $(DB_NAME) --collection tags --file /tags.json --jsonArray
+	rm src/temp_tags.json
+
+drop-collections:
+	docker exec -it $(CONTAINER_NAME) mongo $(DB_NAME) --eval 'db.getCollectionNames().forEach(function(c) { db[c].drop(); })'

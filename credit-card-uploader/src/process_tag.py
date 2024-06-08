@@ -1,8 +1,7 @@
-import db_helper
-import process_tag_c6
-import db_helper
+from db import db_helper
+from banks.c6 import process_tag_c6
 
-def process_tag_from_import(bank_name, collection, tagsCollection, file_date):
+def process_tag_from_upload(bank_name, collection, tagsCollection, file_date):
     print(f'[INFO] Starting tag process')
 
     if bank_name == db_helper.mongo_collection_c6:
