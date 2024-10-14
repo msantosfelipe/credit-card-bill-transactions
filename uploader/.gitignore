@@ -1,0 +1,4 @@
+__pycache__
+venv-credit-card-uploader/
+data/creds
+data/tmp_files/*
