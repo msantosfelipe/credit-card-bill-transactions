@@ -1,5 +1,5 @@
 # run
-run:
+run-uploader:
 	python3 src/main.py
 
 # config
