@@ -3,3 +3,4 @@ venv-credit-card-uploader/
 /.env
 data/creds
 data/tmp_files/*
+data/tags.json
