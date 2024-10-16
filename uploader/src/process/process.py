@@ -2,6 +2,7 @@ import os
 from process.process_c6 import extract_file_data as process_c6
 from process.process_c6 import extract_date as extract_date_c6
 from db.db_client import db_find_uploaded_data_by_name_and_bank, db_file_data_insert
+from process.tags_process import process_tag
 
 
 def validate_processed_file(bank_name, tmp_file_name):
@@ -18,10 +19,10 @@ def process_file(tmp_file_name, bank_name):
         print(f'[ERROR] Invalid bank_name: {bank_name}')
     
     if file_data == None:
-        return False
-
+        return False   
+    
+    process_tag(file_data)
     db_file_data_insert(bank_name, tmp_file_name, file_date, file_data)
-
 
     return True
 

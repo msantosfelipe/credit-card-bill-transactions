@@ -21,10 +21,10 @@ def db_connect():
 # Insert queries
 
 def db_file_data_insert(bank_name, tmp_file_name, file_date, file_data):
-    collection_data = dbClient[bank_name]
+    collection_data = db_client[bank_name]
     collection_data.insert_one(file_data)
     
-    dbClient[COLLECTION_UPLOADS].insert_one({
+    db_client[COLLECTION_UPLOADS].insert_one({
                     'file_name': tmp_file_name,
                     'bank_name': collection_data.name,
                     'file_date': file_date,
@@ -35,10 +35,10 @@ def db_file_data_insert(bank_name, tmp_file_name, file_date, file_data):
 
 
 def db_insert_tags(tags, hash, name):
-    collection_data = dbClient[COLLECTION_TAGS]
+    collection_data = db_client[COLLECTION_TAGS]
     collection_data.insert_many(tags)
 
-    dbClient[COLLECTION_UPLOADS].insert_one({
+    db_client[COLLECTION_UPLOADS].insert_one({
                     'file_name': name,
                     'hash': hash,
                     'upload_date': datetime.now()
@@ -50,24 +50,37 @@ def db_insert_tags(tags, hash, name):
 # Find queries
 
 def db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name):
-    return dbClient[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name, 'bank_name': bank_name})
+    return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name, 'bank_name': bank_name})
+
 
 def db_find_uploaded_data_by_name(tmp_file_name):
-    return dbClient[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name})
+    return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name})
+
+
+def db_find_tags():
+    tags_data = db_client[COLLECTION_TAGS].find({}, {"_id": 0})
+    tags_dict = {}
+
+    for tag_data in tags_data:
+        name = tag_data["name"]
+        keywords = tag_data["keywords"]
+        tags_dict[name] = keywords
+    
+    return tags_dict
 
 
 # Drop collections
 
 def db_drop_all_collections():
-    dbClient[COLLECTION_UPLOADS].drop()
-    dbClient[COLLECTION_TAGS].drop()
-    dbClient['c6'].drop()
+    db_client[COLLECTION_UPLOADS].drop()
+    db_client[COLLECTION_TAGS].drop()
+    db_client['c6'].drop()
     print(f'[INFO] All collections dropped')
 
 
 def db_drop_collection(collection_name):
-    dbClient[collection_name].drop()
+    db_client[collection_name].drop()
     print(f'[INFO] Collection {collection_name} dropped')
 
 
-dbClient = db_connect()
+db_client = db_connect()

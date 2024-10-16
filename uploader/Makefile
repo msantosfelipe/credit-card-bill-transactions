@@ -1,3 +1,7 @@
+# run
+run:
+	python3 src/main.py
+
 # config
 install:
 	pip3 install -r requirements.txt

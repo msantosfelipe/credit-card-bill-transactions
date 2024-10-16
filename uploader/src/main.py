@@ -1,6 +1,6 @@
 from storage.firebase_storage_client import list_pending_files_to_process, download_file
 from process.process import validate_processed_file, process_file, delete_file
-from process.tags import process_tags
+from process.tags_control import upload_tags
 
 
 def process_from_storage():
@@ -18,6 +18,7 @@ def process_from_storage():
 
         download_file(file, tmp_file_name)
         result_ok = process_file(tmp_file_name, bank_name)
+        
         if (result_ok):
             delete_file(tmp_file_name)
             print(f"[INFO] File: {file} processed and deleted.")
@@ -26,5 +27,5 @@ def process_from_storage():
 
 
 if __name__ == '__main__':
-    process_tags()
+    upload_tags()
     process_from_storage()

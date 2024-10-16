@@ -6,7 +6,7 @@ TAG_CONTROL_NAME = 'tag_control'
 TAGS_FILE_PATH = 'data/tags.json'
 
 
-def process_tags():
+def upload_tags():
     hash = generate_tags_file_hash()
 
     tag_control = get_tag_control()
