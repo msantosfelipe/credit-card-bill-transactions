@@ -4,7 +4,7 @@ Read credit card bills and store data in database
 
 ## Banks supported
 - C6 (CSV files)
-// TODO - XP
+- XP (CSV files)
 
 ## Integrations
 - Firebase Storage
