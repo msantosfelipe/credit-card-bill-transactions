@@ -1,14 +1,8 @@
-db:
-	docker compose up -d
+up:
+	cd credit-card-bill-uploader && docker compose up -d
 
-db-stop:
-	docker compose stop
-
-install-requirements:
-	cd credit-card-uploader/ && make install
-
-upload:
-	cd credit-card-uploader/ && make upload
+down:
+	cd credit-card-bill-uploader && docker compose stop
 
 reader:
 	cd credit-card-reader/ && go run .
