@@ -1,7 +1,7 @@
 // src/hooks/useReportByTagData.js
 import { useState, useEffect } from 'react';
 
-const endpoint = 'http://localhost:8080/credit-card-reader/';
+const endpoint = 'http://localhost:8081/credit-card-reader/';
 
 const useReportByTagData = () => {
   const [reportData, setReportData] = useState([]);

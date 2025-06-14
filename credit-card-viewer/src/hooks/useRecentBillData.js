@@ -1,7 +1,7 @@
 // src/hooks/useRecentBillData.js
 import { useState, useEffect } from 'react';
 
-const endpoint = 'http://localhost:8080/credit-card-reader/';
+const endpoint = 'http://localhost:8081/credit-card-reader/';
 
 const useRecentBillData = () => {
   const [recentBillData, setRecentBillData] = useState({
