@@ -9,7 +9,7 @@ firebase_credentials_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
 firebase_bucket_name = os.getenv("FIREBASE_BUCKET_NAME")
 
 
-def connect():
+def _connect():
     cred = credentials.Certificate(firebase_credentials_path)
     firebase_admin.initialize_app(cred, {
         "storageBucket": firebase_bucket_name
@@ -33,4 +33,4 @@ def download_file(remote_path, local_path):
     blob.download_to_filename(local_path)
 
 
-client = connect()
+client = _connect()
