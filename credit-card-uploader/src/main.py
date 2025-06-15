@@ -1,14 +1,13 @@
-from storage.firebase_storage_client import list_pending_files_to_process, download_file
+from storage.firebase_storage_client import list_files_from_storage, download_file
 from process.process import validate_processed_file, process_file, delete_file
 from process.tags_control import upload_tags
 
 
 def process_from_storage():
-    all_files = list_pending_files_to_process()
+    all_files = list_files_from_storage()
 
     for file in all_files:
         print(f'**************************************')
-
         tmp_file_name = file.split("/")[-1]
         bank_name = file.split("/")[1]
         

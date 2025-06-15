@@ -18,7 +18,7 @@ def connect():
     return storage.bucket()
 
 
-def list_pending_files_to_process():
+def list_files_from_storage():
     files = []
     blobs = client.list_blobs(prefix="bills/")
     for blob in blobs:

@@ -53,8 +53,8 @@ def db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name):
     return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name, 'bank_name': bank_name})
 
 
-def db_find_uploaded_data_by_name(tmp_file_name):
-    return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name})
+def db_find_uploaded_data_by_name(file_name):
+    return db_client[COLLECTION_UPLOADS].find_one({'file_name': file_name})
 
 
 def db_find_tags():
