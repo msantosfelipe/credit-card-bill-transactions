@@ -7,6 +7,8 @@ import (
 	"github.com/subosito/gotenv"
 )
 
+var banks = []string{"c6", "xp"}
+
 type Environment struct {
 	ApiPort     string `env:"API_PORT"`
 	ApiBasePath string `env:"API_BASE_PATH"`

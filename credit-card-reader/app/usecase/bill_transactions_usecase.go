@@ -57,7 +57,7 @@ func (us *usecase) GetInstallmentTransactions(bank string) (*domain.Installment,
 	}
 	amount := float64(0)
 	for _, i := range recentBill.Data {
-		if isInstallment(i) {
+		if isInstallment(i, bank) {
 			installments.Data = append(installments.Data, i)
 			amount = addWithPrecision(amount, i.AmountBRL)
 		}
@@ -219,8 +219,12 @@ func isTagMapped(tag string, data []domain.CategoryBill) (bool, int) {
 	return false, 0
 }
 
-func isInstallment(i domain.Transaction) bool {
-	return i.Installment != "Única" && i.Tag != "Subscriptions" && i.Description != "Anuidade Diferenciada"
+func isInstallment(i domain.Transaction, bank string) bool {
+	if bank == "c6" {
+		return i.Installment != "Única" && i.Tag != "Subscriptions" && i.Description != "Anuidade Diferenciada"
+	} else {
+		return i.Installment != "-"
+	}
 }
 
 func addWithPrecision(a, b float64) float64 {
