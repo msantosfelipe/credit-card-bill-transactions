@@ -8,11 +8,11 @@ load_dotenv()
 MONGO_URI = os.getenv("DB_URI")
 MONGO_DABATASE = os.getenv("DB_NAME")
 
-TAG_CONTROL_NAME = 'tag_control'
+CATEGORY_CONTROL_NAME = 'category_control'
 
 COLLECTION_UPLOADS = 'uploads'
 COLLECTION_BILLS = 'bills'
-COLLECTION_TAGS = 'tags'
+COLLECTION_CATEGORIES = 'categories'
 
 
 def _db_connect():
@@ -41,17 +41,17 @@ def db_file_data_insert(bank_name, tmp_file_name, file_date, file_data, bill):
     print(f'[INFO] Data saved to database!')
 
 
-def db_insert_tags(tags, hash):
-    collection_data = db_client[COLLECTION_TAGS]
-    collection_data.insert_many(tags)
+def db_insert_categories(categories, hash):
+    collection_data = db_client[COLLECTION_CATEGORIES]
+    collection_data.insert_many(categories)
 
     db_client[COLLECTION_UPLOADS].insert_one({
-                    'file_name': TAG_CONTROL_NAME,
+                    'file_name': CATEGORY_CONTROL_NAME,
                     'hash': hash,
                     'upload_date': datetime.now()
                 })
     
-    print(f'[INFO] Tags saved to database!')
+    print(f'[INFO] Categories saved to database!')
 
 
 def db_update_bill(file_date, bank, data):
@@ -74,32 +74,32 @@ def db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name):
     return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name, 'bank_name': bank_name})
 
 
-def db_find_tag_control():
-    return db_client[COLLECTION_UPLOADS].find_one({'file_name': TAG_CONTROL_NAME})
+def db_find_category_control():
+    return db_client[COLLECTION_UPLOADS].find_one({'file_name': CATEGORY_CONTROL_NAME})
 
 
-def db_find_tags():
-    tags_data = db_client[COLLECTION_TAGS].find({}, {"_id": 0})
-    tags_dict = {}
+def db_find_categories():
+    categories_data = db_client[COLLECTION_CATEGORIES].find({}, {"_id": 0})
+    categories_dict = {}
 
-    for tag_data in tags_data:
-        name = tag_data["name"]
-        keywords = tag_data["keywords"]
-        tags_dict[name] = keywords
+    for category_data in categories_data:
+        name = category_data["name"]
+        keywords = category_data["keywords"]
+        categories_dict[name] = keywords
     
-    return tags_dict
+    return categories_dict
 
 
 # Drop collections
 
-def db_clean_tags():
-    db_client[COLLECTION_TAGS].drop()
-    db_client[COLLECTION_UPLOADS].delete_one({'file_name': TAG_CONTROL_NAME})
+def db_clean_categories():
+    db_client[COLLECTION_CATEGORIES].drop()
+    db_client[COLLECTION_UPLOADS].delete_one({'file_name': CATEGORY_CONTROL_NAME})
 
 def db_drop_all_collections():
     db_client[COLLECTION_UPLOADS].drop()
     db_client[COLLECTION_BILLS].drop()
-    db_client[COLLECTION_TAGS].drop()
+    db_client[COLLECTION_CATEGORIES].drop()
     db_client['raw_c6'].drop()
     db_client['raw_xp'].drop()
     print(f'[WARN] All collections dropped')

@@ -9,15 +9,15 @@ def validate_processed_file(bank_name, tmp_file_name):
     return db_client.db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name)
 
 
-def process_file(tmp_file_name, bank_name, tags_dict):
+def process_file(tmp_file_name, bank_name, categories_dict):
     if bank_name == "c6":
         file_date = _extract_date_c6(tmp_file_name)
         file_data = _extract_file_data(tmp_file_name, file_date)
-        bill = _build_payload_c6(file_data, tags_dict)
+        bill = _build_payload_c6(file_data, categories_dict)
     elif bank_name == "xp":
         file_date = _extract_date_xp(tmp_file_name)
         file_data = _extract_file_data(tmp_file_name, file_date)
-        bill = _build_payload_xp(file_data, tags_dict)
+        bill = _build_payload_xp(file_data, categories_dict)
     else:
         print(f'[ERROR] Invalid bank_name: {bank_name}')
     
@@ -32,27 +32,27 @@ def delete_file(tmp_file_name):
     os.remove(f"data/tmp_files/{tmp_file_name}")
 
 
-def refresh_bills_tags(bills, use_ai):
-    tags_dict = reverse_tags(db_client.db_find_tags())
+def refresh_bills_categories(bills, use_ai):
+    categories_dict = reverse_categories(db_client.db_find_categories())
     for bill in bills:
         file_date = bill["file_date"]
         bank = bill["bank"]
-        print(f"[INFO] Refreshing tags of bill {file_date} from {bank}")
+        print(f"[INFO] Refreshing categories of bill {file_date} from {bank}")
         for i, transaction in enumerate(bill["data"]):
-            transaction["tag"] = ""
+            transaction["category"] = ""
             description = transaction["description"]
             amount = transaction["amount"]
             purchase_date = transaction["purchase_date"]
 
             matched = False
-            for substring, label in tags_dict.items():
+            for substring, label in categories_dict.items():
                 if substring.lower() in description.lower():
-                    transaction["tag"] = label
-                    print(f'   - Transaction #{i+1} tagged with {label} - {transaction["description"]} / R${amount}')
+                    transaction["category"] = label
+                    print(f'   - Transaction #{i+1} categorized with {label} - {transaction["description"]} / R${amount}')
                     matched = True
                     break
             if use_ai and matched:
-                transaction["tag"] = ai.categorize_transaction(description, amount, purchase_date)
+                transaction["category"] = ai.categorize_transaction(description, amount, purchase_date)
         
         db_client.db_update_bill(file_date, bank, bill["data"])
 
@@ -67,17 +67,17 @@ def _extract_file_data(tmp_file_name, file_date):
     return file_data
 
 
-def _tag_processment(counter, transaction, tags_dict, fields_map):
-    for substring, label in tags_dict.items():
+def _category_processment(counter, transaction, categories_dict, fields_map):
+    for substring, label in categories_dict.items():
         description = transaction[fields_map["description_field_label"]]
         value = transaction[fields_map["value_field_label"]]
         if substring.lower() in description.lower():
-            print(f'   - Transaction #{counter} tagged with {label} - {description} / R${value}')
+            print(f'   - Transaction #{counter} categorized with {label} - {description} / R${value}')
             return label
     return ""
 
 
-def _get_tag_fields_map(bank):
+def _get_category_fields_map(bank):
     if bank == "c6":
         return {"description_field_label": "Descrição", "value_field_label" : "Valor (em R$)"}
     else:
@@ -86,9 +86,9 @@ def _get_tag_fields_map(bank):
 
 # Converts this: {"FOOD": ["mcdonalds", "bk"], "APP": ["99APP", "uber"]}
 # Into this: {"mcdonalds": "FOOD", "bk": "FOOD", "99APP": "APP", "uber": "APP"}
-def reverse_tags(tags_dict):
+def reverse_categories(categories_dict):
     substring_to_label = {}
-    for label, substrings in tags_dict.items():
+    for label, substrings in categories_dict.items():
         for substring in substrings:
             substring_to_label[substring.lower()] = label
     return substring_to_label
@@ -108,7 +108,7 @@ def _extract_date_c6(tmp_file_name):
         return None
 
 
-def _build_payload_c6(file_data, tags_dict):
+def _build_payload_c6(file_data, categories_dict):
     data = []
     for i, transaction in enumerate(file_data["data"]):
         data.append({
@@ -118,7 +118,7 @@ def _build_payload_c6(file_data, tags_dict):
             "description": transaction["Descrição"],
             "amount": transaction["Valor (em R$)"],
             "installment": transaction["Parcela"] if (transaction["Parcela"] != "Única") else "-",
-            "tag": _tag_processment(i+1, transaction, tags_dict, _get_tag_fields_map("c6")),
+            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("c6")),
         })
     return {
         "file_date" : file_data["file_date"],
@@ -141,7 +141,7 @@ def _extract_date_xp(tmp_file_name):
         return None
 
 
-def _build_payload_xp(file_data, tags_dict):
+def _build_payload_xp(file_data, categories_dict):
     data = []
     for i, transaction in enumerate(file_data["data"]):
         data.append({
@@ -151,7 +151,7 @@ def _build_payload_xp(file_data, tags_dict):
             "description": transaction["Estabelecimento"],
             "amount": transaction["Valor"],
             "installment": str(transaction["Parcela"]).replace(" de ", "/"),
-            "tag": _tag_processment(i+1, transaction, tags_dict, _get_tag_fields_map("xp")),
+            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("xp")),
         })
     return {
         "file_date" : file_data["file_date"],

@@ -1,14 +1,14 @@
 import db.db_client as db_client
 import sys
 import process.process as process
+import process.categories_control as categories_control
 from process.ai import init_ai_client
 from storage.firebase_storage_client import list_files_from_storage, download_file
-from process.tags_control import upload_tags
 
 
 def _process_from_storage():
     all_files = list_files_from_storage()
-    tags_dict = process.reverse_tags(db_client.db_find_tags())
+    categories_dict = process.reverse_categories(db_client.db_find_categories())
     num_files = len(all_files)
     for i, file in enumerate(all_files):
         print(f"[INFO] Processing file {i+1} of {num_files}")
@@ -20,7 +20,7 @@ def _process_from_storage():
             continue
 
         download_file(file, tmp_file_name)
-        processed = process.process_file(tmp_file_name, bank_name, tags_dict)
+        processed = process.process_file(tmp_file_name, bank_name, categories_dict)
         if processed:
             process.delete_file(tmp_file_name)
             print(f"[INFO] File: {file} processed and deleted")
@@ -33,10 +33,10 @@ if __name__ == '__main__':
     if arguments and arguments[0] == "refresh":
         use_ai = len(arguments) > 1 and arguments[1] == "ai"
         init_ai_client()
-        print(f'\n*** Starting Refreshing with tags script. Use AI: {use_ai} ***\n')
-        upload_tags()
+        print(f'\n*** Starting Refreshing with categories script. Use AI: {use_ai} ***\n')
+        categories_control.upload_categories()
         bills = db_client.db_find_all_bills()
-        process.refresh_bills_tags(bills, use_ai)
+        process.refresh_bills_categories(bills, use_ai)
 
         print("[INFO] All bills were refreshed!")
         exit(0)
@@ -46,5 +46,5 @@ if __name__ == '__main__':
         print('[WARN] Dropping all collections!')
         db_client.db_drop_all_collections()
     
-    upload_tags()
+    categories_control.upload_categories()
     _process_from_storage()

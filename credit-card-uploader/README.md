@@ -22,7 +22,7 @@ Read credit card bills and store data in database
     - First time running:
         - Run `mkdir data/creds` and `mkdir data/tmp_files`
         - Create a bucket on Firebase and generate .json credentials file and put it in `data/creds`
-        - Run `cp data/samples/tags.json data/`
+        - Run `cp data/samples/categories.json data/`
   - (If not running database) Run `docker compose up -d`
   - Configure venv (see Makefile) and run `make run-uploader`
 
