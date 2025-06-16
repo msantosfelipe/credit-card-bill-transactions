@@ -9,4 +9,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=pass
     volumes:
-      - ./data:/data/db
+      - credit_card_reader_mongo_data:/bitnami/mongodb
+
+volumes:
+  credit_card_reader_mongo_data:

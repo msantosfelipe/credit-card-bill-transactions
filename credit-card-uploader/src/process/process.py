@@ -2,7 +2,6 @@ import os
 import pandas as pd
 from datetime import datetime
 import db.db_client as db_client
-# from process.tags_process import process_tag
 
 
 def validate_processed_file(bank_name, tmp_file_name):
@@ -25,9 +24,11 @@ def process_file(tmp_file_name, bank_name, tags_dict):
         return False
     
     db_client.db_file_data_insert(bank_name, tmp_file_name, file_date, file_data, bill)
-
     return True
 
+
+def process_tags_with_ai():
+    print('')
 
 def delete_file(tmp_file_name):
     os.remove(f"data/tmp_files/{tmp_file_name}")

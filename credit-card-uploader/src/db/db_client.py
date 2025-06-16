@@ -32,7 +32,7 @@ def db_file_data_insert(bank_name, tmp_file_name, file_date, file_data, bill):
 
     db_client[COLLECTION_UPLOADS].insert_one({
                     'file_name': tmp_file_name,
-                    'bank_name': collection_data.name,
+                    'bank_name': bank_name,
                     'file_date': file_date,
                     'import_date': datetime.now(),
                     'upload_date': datetime.now()
