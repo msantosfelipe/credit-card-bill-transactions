@@ -1,5 +1,5 @@
 import db.db_client as db_client
-import sys
+import sys, os
 import process.process as process
 import process.categories_control as categories_control
 from process.ai import init_ai_client
@@ -38,17 +38,15 @@ if __name__ == '__main__':
         bills = db_client.db_find_all_bills()
         process.refresh_bills_categories(bills, use_ai)
 
-        if use_ai:
-            print('')
-            # TODO fazer upload do arquivo categores_ai.json na collection
-
         print("[INFO] All bills were refreshed!")
         exit(0)
 
     print('\n*** Starting import script ***\n')
     if arguments and arguments[0] == "clean":
-        print('[WARN] Dropping all collections!')
+        print('[WARN] Dropping all collections and removing categories_ai file (if exists)!')
         db_client.db_drop_all_collections()
-    
+        categories_control.remove_categories_ai_file()
+
+    # Beging process withous arguments
     categories_control.upload_categories()
     _process_from_storage()

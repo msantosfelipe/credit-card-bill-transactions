@@ -8,7 +8,7 @@ load_dotenv()
 MONGO_URI = os.getenv("DB_URI")
 MONGO_DABATASE = os.getenv("DB_NAME")
 
-CATEGORY_CONTROL_NAME = 'category_control'
+CATEGORY_CONTROL_NAME = "category_control"
 
 COLLECTION_UPLOADS = 'uploads'
 COLLECTION_BILLS = 'bills'
@@ -70,6 +70,7 @@ def db_update_bill(file_date, bank, data):
 def db_find_all_bills():
     return db_client[COLLECTION_BILLS].find()
 
+
 def db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name):
     return db_client[COLLECTION_UPLOADS].find_one({'file_name': tmp_file_name, 'bank_name': bank_name})
 
@@ -95,6 +96,7 @@ def db_find_categories():
 def db_clean_categories():
     db_client[COLLECTION_CATEGORIES].drop()
     db_client[COLLECTION_UPLOADS].delete_one({'file_name': CATEGORY_CONTROL_NAME})
+
 
 def db_drop_all_collections():
     db_client[COLLECTION_UPLOADS].drop()

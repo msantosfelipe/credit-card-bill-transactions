@@ -8,10 +8,9 @@ CATEGORIES_AI_FILE_PATH = os.environ.get("CATEGORIES_AI_FILE_PATH")
 
 
 def upload_categories():
-    hash = _generate_categories_file_hash(CATEGORIES_FILE_PATH)
-    hash_ai = _generate_categories_file_hash(CATEGORIES_AI_FILE_PATH)
-
+    hash = _generate_categories_file_hash()
     category_control = db_client.db_find_category_control()
+
     if category_control is None:
         _insert_categories(hash)
         return
@@ -25,15 +24,41 @@ def upload_categories():
             _insert_categories(hash)
     
 
+def remove_categories_ai_file():
+    if os.path.exists(CATEGORIES_AI_FILE_PATH):
+        os.remove(CATEGORIES_AI_FILE_PATH)        
+
+
 def _insert_categories(hash):
-    with open(CATEGORIES_FILE_PATH, "r") as file:
-        categories = json.load(file)
-        db_client.db_insert_categories(categories, hash)
+    all_categories = []
+
+    if os.path.exists(CATEGORIES_FILE_PATH):
+        with open(CATEGORIES_FILE_PATH, "r") as file:
+            categories = json.load(file)
+            all_categories.extend(categories)
+
+    if os.path.exists(CATEGORIES_AI_FILE_PATH):
+        with open(CATEGORIES_AI_FILE_PATH, "r") as ai_file:
+            ai_categories = json.load(ai_file)
+            all_categories.extend(ai_categories)
+    
+    if len(all_categories) > 0:
+        db_client.db_insert_categories(all_categories, hash)
 
 
-def _generate_categories_file_hash(path):
-    with open(path, "rb") as file:
-        content = file.read()
-        hash_obj = hashlib.sha256(content)
-        hash_hex = hash_obj.hexdigest()
-    return hash_hex
+def _generate_categories_file_hash():
+    hash_categories_file = ""
+    hash_categories_ai_file = ""
+    
+    if os.path.exists(CATEGORIES_FILE_PATH):
+        with open(CATEGORIES_FILE_PATH, "rb") as file:
+            content = file.read()
+            hash_categories_file = hashlib.sha256(content).hexdigest()
+
+    if os.path.exists(CATEGORIES_AI_FILE_PATH):
+        with open(CATEGORIES_AI_FILE_PATH, "rb") as file:
+            content = file.read()
+            hash_categories_ai_file = hashlib.sha256(content).hexdigest()
+
+    combined_hash = hash_categories_file + hash_categories_ai_file
+    return hashlib.sha256(combined_hash.encode()).hexdigest()
