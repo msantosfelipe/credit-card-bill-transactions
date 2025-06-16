@@ -22,7 +22,11 @@ def upload_categories():
             print(f'[WARN] Categories have been updated, dropping categories collection to be reimported!')
             db_client.db_clean_categories()
             _insert_categories(hash)
-    
+
+
+def update_hash():
+    hash = _generate_categories_file_hash()
+    db_client.db_update_categories_hash(hash)
 
 def remove_categories_ai_file():
     if os.path.exists(CATEGORIES_AI_FILE_PATH):

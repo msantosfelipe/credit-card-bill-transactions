@@ -2,7 +2,6 @@ import db.db_client as db_client
 import sys, os
 import process.process as process
 import process.categories_control as categories_control
-from process.ai import init_ai_client
 from storage.firebase_storage_client import list_files_from_storage, download_file
 
 
@@ -32,11 +31,12 @@ if __name__ == '__main__':
     arguments = sys.argv[1:]
     if arguments and arguments[0] == "refresh":
         use_ai = len(arguments) > 1 and arguments[1] == "ai"
-        init_ai_client()
         print(f'\n*** Starting Refreshing with categories script. Use AI: {use_ai} ***\n')
         categories_control.upload_categories()
         bills = db_client.db_find_all_bills()
         process.refresh_bills_categories(bills, use_ai)
+        if use_ai:
+            categories_control.update_hash()
 
         print("[INFO] All bills were refreshed!")
         exit(0)

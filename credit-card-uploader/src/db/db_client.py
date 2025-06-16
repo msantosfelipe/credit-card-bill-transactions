@@ -44,14 +44,33 @@ def db_file_data_insert(bank_name, tmp_file_name, file_date, file_data, bill):
 def db_insert_categories(categories, hash):
     collection_data = db_client[COLLECTION_CATEGORIES]
     collection_data.insert_many(categories)
-
     db_client[COLLECTION_UPLOADS].insert_one({
                     'file_name': CATEGORY_CONTROL_NAME,
                     'hash': hash,
                     'upload_date': datetime.now()
                 })
-    
     print(f'[INFO] Categories saved to database!')
+
+
+def db_append_ai_category(category, description):
+    db_category = db_client[COLLECTION_CATEGORIES].find_one({'name': category})
+    if db_category is None:
+        db_client[COLLECTION_CATEGORIES].insert_one({
+            "name" : category,
+            "keyworkds" : [description]
+        })
+        return
+    
+
+def db_update_categories_hash(hash):
+    db_client[COLLECTION_UPLOADS].update_one(
+        {'file_name': CATEGORY_CONTROL_NAME},
+        {
+            '$set': {
+                'hash': hash,
+            }
+        }
+    )
 
 
 def db_update_bill(file_date, bank, data):
@@ -61,7 +80,7 @@ def db_update_bill(file_date, bank, data):
             '$set': {
                 'data': data,
             }
-        },
+        }
     )
 
 

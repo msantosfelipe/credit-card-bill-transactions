@@ -48,13 +48,14 @@ def refresh_bills_categories(bills, use_ai):
             for substring, label in categories_dict.items():
                 if substring.lower() in description.lower():
                     transaction["category"] = label
-                    print(f'   - Transaction #{i+1} categorized with {label} - {transaction["description"]} / R${amount}')
+                    print(f' - Transaction #{i+1} categorized with {label} - {description} / R${amount}')
                     matched = True
                     break
             if use_ai and not matched:
                 category = ai.categorize_transaction(description, amount, purchase_date)
-                ai.update_dict_file(category, description)
                 transaction["category"] = category
+                db_client.db_append_ai_category(category, description)
+                categories_dict[description] = category
         
         db_client.db_update_bill(file_date, bank, bill["data"])
     
