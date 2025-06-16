@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import process.ai as ai
 from datetime import datetime
 import db.db_client as db_client
 
@@ -27,9 +28,6 @@ def process_file(tmp_file_name, bank_name, tags_dict):
     return True
 
 
-def process_tags_with_ai():
-    print('')
-
 def delete_file(tmp_file_name):
     os.remove(f"data/tmp_files/{tmp_file_name}")
 
@@ -54,19 +52,26 @@ def tagProcessment(counter, transaction, tags_dict, fields_map):
     return ""
 
 
-def refresh_bills_tags(bills):
+def refresh_bills_tags(bills, use_ai):
     tags_dict = db_client.db_find_tags()
     for bill in bills:
         file_date = bill["file_date"]
         bank = bill["bank"]
         print(f"[INFO] Refreshing tags of bill {file_date} from {bank}")
-        for i, transaction in enumerate(bill["data"]):            
+        for i, transaction in enumerate(bill["data"]):
             transaction["tag"] = ""
+            description = transaction["description"]
+            amount = transaction["amount"]
+            purchase_date = transaction["purchase_date"]
+
             for label, tags in tags_dict.items():
-                description = transaction["description"]
                 if any(substring in description for substring in tags):
-                    print(f'   - Transaction #{i+1} tagged with {label} - {description} / R${transaction["amount"]}')
+                    print(f'   - Transaction #{i+1} tagged with {label} - {description} / R${amount}')
                     transaction["tag"] = label
+                    break
+            if use_ai and transaction["tag"] == "":
+                transaction["tag"] = ai.categorize_transaction(description, amount, purchase_date)
+        
         db_client.db_update_bill(file_date, bank, bill["data"])
 
 

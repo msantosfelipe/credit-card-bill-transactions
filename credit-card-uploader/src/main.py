@@ -1,6 +1,7 @@
 import db.db_client as db_client
 import sys
 import process.process as process
+from process.ai import init_ai_client
 from storage.firebase_storage_client import list_files_from_storage, download_file
 from process.tags_control import upload_tags
 
@@ -30,10 +31,13 @@ def _process_from_storage():
 if __name__ == '__main__':
     arguments = sys.argv[1:]
     if arguments and arguments[0] == "refresh":
-        print('\n*** Starting import script - Refreshing tags ***\n')
+        use_ai = arguments[1] == "ai"
+        init_ai_client()
+        print('\n*** Starting Refreshing with tags script. Use AI: {use_ai} ***\n')
         upload_tags()
         bills = db_client.db_find_all_bills()
-        process.refresh_bills_tags(bills)
+        process.refresh_bills_tags(bills, use_ai)
+
         print("[INFO] All bills were refreshed!")
         exit(0)
 

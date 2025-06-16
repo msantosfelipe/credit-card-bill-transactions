@@ -4,3 +4,4 @@ venv-credit-card-uploader/
 data/creds
 data/tmp_files/*
 data/tags.json
+data/tags_ai.json

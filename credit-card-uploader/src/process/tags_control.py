@@ -1,8 +1,9 @@
 import db.db_client as db_client
 import hashlib
 import json
+import os
 
-TAGS_FILE_PATH = 'data/tags.json'
+TAGS_FILE_PATH = os.environ.get("TAGS_FILE_PATH")
 
 
 def upload_tags():

@@ -8,6 +8,9 @@ run-uploader-clean:
 run-uploader-refresh:
 	python3 src/main.py refresh
 
+run-uploader-refresh-ai:
+	python3 src/main.py refresh ai
+
 # venv
 create-venv:
 	python3 -m venv venv-credit-card-uploader

@@ -25,3 +25,8 @@ Read credit card bills and store data in database
         - Run `cp data/samples/tags.json data/`
   - (If not running database) Run `docker compose up -d`
   - Configure venv (see Makefile) and run `make run-uploader`
+
+
+# ollama minstral
+- Install:  `curl -fsSL https://ollama.com/install.sh | sh`
+- Run Mistral: `ollama run mistral`
