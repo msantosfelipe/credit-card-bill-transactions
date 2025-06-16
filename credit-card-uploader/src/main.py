@@ -38,6 +38,10 @@ if __name__ == '__main__':
         bills = db_client.db_find_all_bills()
         process.refresh_bills_categories(bills, use_ai)
 
+        if use_ai:
+            print('')
+            # TODO fazer upload do arquivo categores_ai.json na collection
+
         print("[INFO] All bills were refreshed!")
         exit(0)
 

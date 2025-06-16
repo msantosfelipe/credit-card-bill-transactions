@@ -51,11 +51,13 @@ def refresh_bills_categories(bills, use_ai):
                     print(f'   - Transaction #{i+1} categorized with {label} - {transaction["description"]} / R${amount}')
                     matched = True
                     break
-            if use_ai and matched:
-                transaction["category"] = ai.categorize_transaction(description, amount, purchase_date)
+            if use_ai and not matched:
+                category = ai.categorize_transaction(description, amount, purchase_date)
+                ai.update_dict_file(category, description)
+                transaction["category"] = category
         
         db_client.db_update_bill(file_date, bank, bill["data"])
-
+    
 
 def _extract_file_data(tmp_file_name, file_date):
     df = pd.read_csv(f"data/tmp_files/{tmp_file_name}", sep=';')

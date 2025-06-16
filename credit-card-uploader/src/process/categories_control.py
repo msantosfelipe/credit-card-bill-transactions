@@ -4,10 +4,12 @@ import json
 import os
 
 CATEGORIES_FILE_PATH = os.environ.get("CATEGORIES_FILE_PATH")
+CATEGORIES_AI_FILE_PATH = os.environ.get("CATEGORIES_AI_FILE_PATH")
 
 
 def upload_categories():
-    hash = _generate_categories_file_hash()
+    hash = _generate_categories_file_hash(CATEGORIES_FILE_PATH)
+    hash_ai = _generate_categories_file_hash(CATEGORIES_AI_FILE_PATH)
 
     category_control = db_client.db_find_category_control()
     if category_control is None:
@@ -29,8 +31,8 @@ def _insert_categories(hash):
         db_client.db_insert_categories(categories, hash)
 
 
-def _generate_categories_file_hash():
-    with open(CATEGORIES_FILE_PATH, "rb") as file:
+def _generate_categories_file_hash(path):
+    with open(path, "rb") as file:
         content = file.read()
         hash_obj = hashlib.sha256(content)
         hash_hex = hash_obj.hexdigest()

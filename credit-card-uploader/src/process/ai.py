@@ -10,12 +10,12 @@ def init_ai_client():
     global client 
     client = OpenAI()
 
-def categorize_transaction(description, value, date):
+def categorize_transaction(transaction_description, value, date):
     print(f"   - Categorizing transaction using AI model: {ai_model}")
     prompt = (
         f"You are an assistent that categorizes credit card transactions in categories as "
         f"Transport, Food, Trip, Market, Drugstore, Entertainament etc. "
-        f"Description: {description}; "
+        f"Description: {transaction_description}; "
         f"Value: {value}; "
         f"Date: {date}; "
         f"What is the most appropriate category for this transaction? "
@@ -32,25 +32,34 @@ def categorize_transaction(description, value, date):
         ]
     )
     category = completion.choices[0].message.content
+    print(f"      - Description: {transaction_description} - AI response: {completion.choices[0].message.content}")
 
-    categories = get_ai_categories_from_file()
+    update_dict_file(category, transaction_description)
+    return category
+
+
+def update_dict_file(category, transaction_description):
+    dict_updated = False
+    categories = _get_ai_categories_from_file()
     existing = next((item for item in categories if item["name"] == category), None)
     if existing:
-        if description not in existing["keywords"]:
-            existing["keywords"].append(description)
+        if transaction_description not in existing["keywords"]:
+            existing["keywords"].append(transaction_description)
+            dict_updated = True
     else:
         categories.append({
             "name": category,
-            "keywords": [description]
+            "keywords": [transaction_description]
         })
+        dict_updated = True
     
     with open(CATEGORIES_AI_FILE_PATH, "w", encoding="utf-8") as f:
         json.dump(categories, f, indent=4, ensure_ascii=False)
-
-    print(f"      - Description: {description} - AI response: {completion.choices[0].message.content}")
-    return ""
     
-def get_ai_categories_from_file():
+    return dict_updated
+
+
+def _get_ai_categories_from_file():
     if os.path.exists(CATEGORIES_AI_FILE_PATH):
         with open(CATEGORIES_AI_FILE_PATH, "r", encoding="utf-8") as f:
             try:
