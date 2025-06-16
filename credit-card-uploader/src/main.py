@@ -8,7 +8,7 @@ from process.tags_control import upload_tags
 
 def _process_from_storage():
     all_files = list_files_from_storage()
-    tags_dict = db_client.db_find_tags()
+    tags_dict = process.reverse_tags(db_client.db_find_tags())
     num_files = len(all_files)
     for i, file in enumerate(all_files):
         print(f"[INFO] Processing file {i+1} of {num_files}")
@@ -31,9 +31,9 @@ def _process_from_storage():
 if __name__ == '__main__':
     arguments = sys.argv[1:]
     if arguments and arguments[0] == "refresh":
-        use_ai = arguments[1] == "ai"
+        use_ai = len(arguments) > 1 and arguments[1] == "ai"
         init_ai_client()
-        print('\n*** Starting Refreshing with tags script. Use AI: {use_ai} ***\n')
+        print(f'\n*** Starting Refreshing with tags script. Use AI: {use_ai} ***\n')
         upload_tags()
         bills = db_client.db_find_all_bills()
         process.refresh_bills_tags(bills, use_ai)
@@ -45,6 +45,6 @@ if __name__ == '__main__':
     if arguments and arguments[0] == "clean":
         print('[WARN] Dropping all collections!')
         db_client.db_drop_all_collections()
-
+    
     upload_tags()
     _process_from_storage()
