@@ -45,7 +45,7 @@ if __name__ == '__main__':
     if arguments and arguments[0] == "clean":
         print('[WARN] Dropping all collections and removing categories_ai file (if exists)!')
         db_client.db_drop_all_collections()
-        categories_control.remove_categories_ai_file()
+        #categories_control.remove_categories_ai_file()
 
     # Beging process withous arguments
     categories_control.upload_categories()

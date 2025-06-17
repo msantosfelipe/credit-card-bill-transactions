@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-import process.ai as ai
+import process.ai.openai as ai
+import process.ai.qdrant as qdrant
 from datetime import datetime
 import db.db_client as db_client
 
@@ -34,6 +35,9 @@ def delete_file(tmp_file_name):
 
 def refresh_bills_categories(bills, use_ai):
     categories_dict = reverse_categories(db_client.db_find_categories())
+    if use_ai:
+        qdrant.update_qdrant_collection(categories_dict)
+    return
     for bill in bills:
         file_date = bill["file_date"]
         bank = bill["bank"]

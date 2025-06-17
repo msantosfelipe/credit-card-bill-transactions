@@ -2,12 +2,11 @@ from openai import OpenAI
 import json
 import os
 
-client = OpenAI()
 CATEGORIES_AI_FILE_PATH = os.environ.get("CATEGORIES_AI_FILE_PATH")
-ai_model = os.environ.get("OPEN_API_MODEL")
-
+VALID_CATEGORIES = {"Transport", "Food", "Market", ...}
 
 def categorize_transaction(transaction_description, value, date):
+    ai_model = os.environ.get("OPEN_API_MODEL")
     print(f"  - Categorizing transaction using AI model: {ai_model}")
     prompt = (
         f"You are an assistent that categorizes credit card transactions in categories as "
@@ -31,11 +30,11 @@ def categorize_transaction(transaction_description, value, date):
     category = completion.choices[0].message.content
     print(f"   - Description: {transaction_description} - AI response: {completion.choices[0].message.content}")
 
-    update_dict_file(category, transaction_description)
+    _update_dict_file(category, transaction_description)
     return category
 
 
-def update_dict_file(category, transaction_description):
+def _update_dict_file(category, transaction_description):
     categories = _get_ai_categories_from_file()
     existing = next((item for item in categories if item["name"] == category), None)
     if existing:
@@ -60,3 +59,10 @@ def _get_ai_categories_from_file():
                 return []
     else:
         return []
+
+
+def _init_client():
+    print("[INFO] Initializing OpenAI client")
+    return OpenAI()
+
+client = _init_client()
