@@ -2,6 +2,9 @@
 run-uploader:
 	python3 src/main.py
 
+run-uploader-ai:
+	python3 src/main.py ai
+
 run-uploader-clean:
 	python3 src/main.py clean
 

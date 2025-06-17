@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import process.ai as ai
+import process.ai.ai as ai
 from datetime import datetime
 import db.db_client as db_client
 
@@ -9,15 +9,15 @@ def validate_processed_file(bank_name, tmp_file_name):
     return db_client.db_find_uploaded_data_by_name_and_bank(bank_name, tmp_file_name)
 
 
-def process_file(tmp_file_name, bank_name, categories_dict):
+def process_file(tmp_file_name, bank_name, categories_dict, use_ai):
     if bank_name == "c6":
         file_date = _extract_date_c6(tmp_file_name)
         file_data = _extract_file_data(tmp_file_name, file_date)
-        bill = _build_payload_c6(file_data, categories_dict)
+        bill = _build_payload_c6(file_data, categories_dict, use_ai)
     elif bank_name == "xp":
         file_date = _extract_date_xp(tmp_file_name)
         file_data = _extract_file_data(tmp_file_name, file_date)
-        bill = _build_payload_xp(file_data, categories_dict)
+        bill = _build_payload_xp(file_data, categories_dict, use_ai)
     else:
         print(f'[ERROR] Invalid bank_name: {bank_name}')
     
@@ -70,25 +70,32 @@ def _extract_file_data(tmp_file_name, file_date):
     return file_data
 
 
-def _category_processment(counter, transaction, categories_dict, fields_map):
+def _category_processment(counter, transaction, categories_dict, fields_map, use_ai):
+    description = transaction[fields_map["description_field_label"]]
+    value = transaction[fields_map["value_field_label"]]
+    purchase_date = transaction[fields_map["date_field_label"]]
+    
     for substring, label in categories_dict.items():
-        description = transaction[fields_map["description_field_label"]]
-        value = transaction[fields_map["value_field_label"]]
         if substring.lower() in description.lower():
             print(f'   - Transaction #{counter} categorized with {label} - {description} / R${value}')
             return label
-    return ""
+    if not use_ai:
+        return ""
+    category = ai.categorize_transaction(description, value, purchase_date)
+    db_client.db_append_ai_category(category, description)
+    categories_dict[description] = category
+    return category
 
 
 def _get_category_fields_map(bank):
     if bank == "c6":
-        return {"description_field_label": "Descrição", "value_field_label" : "Valor (em R$)"}
+        return {"description_field_label": "Descrição", "value_field_label" : "Valor (em R$)", "date_field_label": "Data de Compra"}
     else:
-        return {"description_field_label": "Estabelecimento", "value_field_label" : "Valor"}
+        return {"description_field_label": "Estabelecimento", "value_field_label" : "Valor", "date_field_label": "Data"}
 
 
-# Converts this: {"FOOD": ["mcdonalds", "bk"], "APP": ["99APP", "uber"]}
-# Into this: {"mcdonalds": "FOOD", "bk": "FOOD", "99APP": "APP", "uber": "APP"}
+# Converts this: {"Food": ["mcdonalds", "bk"], "Transport": ["99APP", "uber"]}
+# Into this: {"mcdonalds": "Food", "bk": "Food", "99APP": "Transport", "uber": "Transport"}
 def reverse_categories(categories_dict):
     substring_to_label = {}
     for label, substrings in categories_dict.items():
@@ -111,7 +118,7 @@ def _extract_date_c6(tmp_file_name):
         return None
 
 
-def _build_payload_c6(file_data, categories_dict):
+def _build_payload_c6(file_data, categories_dict, use_ai):
     data = []
     for i, transaction in enumerate(file_data["data"]):
         data.append({
@@ -121,7 +128,7 @@ def _build_payload_c6(file_data, categories_dict):
             "description": transaction["Descrição"],
             "amount": transaction["Valor (em R$)"],
             "installment": transaction["Parcela"] if (transaction["Parcela"] != "Única") else "-",
-            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("c6")),
+            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("c6"), use_ai),
         })
     return {
         "file_date" : file_data["file_date"],
@@ -144,7 +151,7 @@ def _extract_date_xp(tmp_file_name):
         return None
 
 
-def _build_payload_xp(file_data, categories_dict):
+def _build_payload_xp(file_data, categories_dict, use_ai):
     data = []
     for i, transaction in enumerate(file_data["data"]):
         data.append({
@@ -154,7 +161,7 @@ def _build_payload_xp(file_data, categories_dict):
             "description": transaction["Estabelecimento"],
             "amount": transaction["Valor"],
             "installment": str(transaction["Parcela"]).replace(" de ", "/"),
-            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("xp")),
+            "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("xp"), use_ai),
         })
     return {
         "file_date" : file_data["file_date"],
