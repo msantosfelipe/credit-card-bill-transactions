@@ -3,6 +3,9 @@ import db.db_client as db_client
 import process.process as process
 import process.categories_control as categories_control
 from storage.firebase_storage_client import list_files_from_storage, download_file
+from process.categorization import (
+    manual_categorization_counter, ai_categorization_counter
+)
 
 
 def timing(func):
@@ -73,3 +76,5 @@ if __name__ == '__main__':
 
     print('\n*** Starting import script ***\n')
     _process_from_storage(use_ai)
+    print(f"Transactions manually categorized: {manual_categorization_counter}")
+    print(f"Transactions categorized with AI: {ai_categorization_counter}")

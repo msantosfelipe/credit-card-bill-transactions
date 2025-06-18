@@ -7,9 +7,9 @@ CATEGORIES_AI_FILE_PATH = os.environ.get("CATEGORIES_AI_FILE_PATH")
 VALID_CATEGORIES = ["Transport, Food, Market, Drugstore, Entertainment, Education, Healthcare, Other"]
 
 
-def categorize_transaction(transaction_description, value, date):
+def ai_categorize_transaction(transaction_description, value, date):
+    print(f" - Categorizing '{transaction_description}' with AI...")
     ai_model = os.environ.get("OPEN_API_MODEL")
-    print(f"  - Categorizing transaction using AI model: {ai_model}")
     prompt = _build_prompt(transaction_description, value, date)
 
     completion = client.chat.completions.create(
@@ -23,9 +23,8 @@ def categorize_transaction(transaction_description, value, date):
     )
 
     category = completion.choices[0].message.content
-    print(f"   - Description: {transaction_description} - AI response: {category}")
     
-    normalized_category = category.split(" ")[0]
+    normalized_category = category.strip().split(" ")[0]
     _update_dict_file(normalized_category, transaction_description)
     return normalized_category
 
@@ -33,11 +32,11 @@ def categorize_transaction(transaction_description, value, date):
 def _build_prompt(description: str, value: float, date: str) -> str:
     examples = """
         **Categorizations examples:**
-        1. Description: "IFOOD *LANCHE"; Value: 45.50; Date: 10/03/2023 → Food
-        3. Description: "DROGARIA SAUDE"; Value: 32.00; Date: 11/03/2023 → Drugstore
-        4. Description: "Udemy"; Value: 39.90; Date: 01/03/2023 → Education
-        5. Description: "Bar Cerveja"; Value: 39.90; Date: 01/03/2023 → Entertainment
-        6. Description: "FITNESS"; Value: 39.90; Date: 01/03/2023 → Healthcare
+        1. Description: "ifood lanche comida"; Value: 45.50; Date: 10/03/2023 → Food
+        3. Description: "droga farma"; Value: 32.00; Date: 11/03/2023 → Drugstore
+        4. Description: "udemy"; Value: 39.90; Date: 01/03/2023 → Education
+        5. Description: "bar bebida deposito whisky festa ingresso"; Value: 39.90; Date: 01/03/2023 → Entertainment
+        6. Description: "fitness academia saude"; Value: 39.90; Date: 01/03/2023 → Healthcare
     """
 
     prompt = f"""

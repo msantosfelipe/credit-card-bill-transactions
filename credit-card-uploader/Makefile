@@ -12,19 +12,19 @@ down-ai:
 
 # run
 run-uploader:
-	python3 src/main.py
-
-run-uploader-ai:
 	python3 src/main.py ai
+
+run-uploader-not-ai:
+	python3 src/main.py
 
 run-uploader-clean:
 	python3 src/main.py clean
 
 run-uploader-refresh:
-	python3 src/main.py refresh
-
-run-uploader-refresh-ai:
 	python3 src/main.py refresh ai
+
+run-uploader-refresh-not-ai:
+	python3 src/main.py refresh
 
 # venv
 create-venv:
