@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-import process.ai.ai as ai
+import process.categorization as categorization
 from datetime import datetime
 import db.db_client as db_client
 
@@ -39,26 +39,23 @@ def refresh_bills_categories(bills, use_ai):
         bank = bill["bank"]
         print(f"[INFO] Refreshing categories of bill {file_date} from {bank}")
         for i, transaction in enumerate(bill["data"]):
-            transaction["category"] = ""
-            description = transaction["description"]
-            amount = transaction["amount"]
-            purchase_date = transaction["purchase_date"]
+            counter = i+1
+            transaction_description = transaction["description"]
+            transaction_amount = transaction["amount"]
+            transaction_date = transaction["purchase_date"]
 
-            matched = False
-            for keyword, label in categories_dict.items():
-                if keyword.lower() in description.lower():
-                    transaction["category"] = label
-                    print(f' - Transaction #{i+1} categorized with {label} - {description} / R${amount}')
-                    matched = True
-                    break
-            if use_ai and not matched:
-                category = ai.categorize_transaction(description, amount, purchase_date)
-                transaction["category"] = category
-                db_client.db_append_ai_category(category, description)
-                categories_dict[description] = category
+            category = categorization.categorize_transaction(
+                counter, 
+                transaction_description,
+                transaction_amount,
+                transaction_date,
+                categories_dict, 
+                use_ai,
+            )
+            transaction["category"] = category
         
         db_client.db_update_bill(file_date, bank, bill["data"])
-    
+
 
 def _extract_file_data(tmp_file_name, file_date):
     df = pd.read_csv(f"data/tmp_files/{tmp_file_name}", sep=';')
@@ -71,19 +68,19 @@ def _extract_file_data(tmp_file_name, file_date):
 
 
 def _category_processment(counter, transaction, categories_dict, fields_map, use_ai):
-    description = transaction[fields_map["description_field_label"]]
-    value = transaction[fields_map["value_field_label"]]
-    purchase_date = transaction[fields_map["date_field_label"]]
+    transaction_description = transaction[fields_map["description_field_label"]]
+    transaction_amount = transaction[fields_map["value_field_label"]]
+    transaction_date = transaction[fields_map["date_field_label"]]
     
-    for keyword, label in categories_dict.items():
-        if keyword.lower() in description.lower():
-            print(f'   - Transaction #{counter} categorized with {label} - {description} / R${value}')
-            return label
-    if not use_ai:
-        return ""
-    category = ai.categorize_transaction(description, value, purchase_date)
-    db_client.db_append_ai_category(category, description)
-    categories_dict[description] = category
+    category = categorization.categorize_transaction(
+                counter, 
+                transaction_description,
+                transaction_amount,
+                transaction_date,
+                categories_dict, 
+                use_ai,
+            )
+    
     return category
 
 
