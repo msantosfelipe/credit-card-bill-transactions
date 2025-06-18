@@ -1,3 +1,15 @@
+up:
+	docker compose up -d
+
+down:
+	docker compose down
+
+up-ai:
+	ollama run mistral
+
+down-ai:
+	ollama down mistral
+
 # run
 run-uploader:
 	python3 src/main.py

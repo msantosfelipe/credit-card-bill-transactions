@@ -23,10 +23,11 @@ def categorize_transaction(transaction_description, value, date):
     )
 
     category = completion.choices[0].message.content
-    print(f"   - Description: {transaction_description} - AI response: {completion.choices[0].message.content}")
-
-    _update_dict_file(category, transaction_description)
-    return category
+    print(f"   - Description: {transaction_description} - AI response: {category}")
+    
+    normalized_category = category.split(" ")[0]
+    _update_dict_file(normalized_category, transaction_description)
+    return normalized_category
 
 
 def _build_prompt(description: str, value: float, date: str) -> str:
@@ -40,8 +41,7 @@ def _build_prompt(description: str, value: float, date: str) -> str:
     """
 
     prompt = f"""
-        You are an assistent that categorizes credit card transactions in these categories {', '.join(VALID_CATEGORIES)}
-        Transactions descriptions are in PT-BR        
+        You are an assistent that categorizes credit card transactions ONLY in these categories: {', '.join(VALID_CATEGORIES)}.
 
         {examples}
 
@@ -49,6 +49,7 @@ def _build_prompt(description: str, value: float, date: str) -> str:
         Value: {value};
         Date: {date} - {_get_weekday(date)};
         
+        Transactions descriptions are in PT-BR.
         What is the most appropriate category for this transaction?
         Answer DIRECTLY in one world, ONLY with the category name, no explanations
     """

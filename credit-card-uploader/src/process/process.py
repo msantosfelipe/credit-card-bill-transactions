@@ -45,8 +45,8 @@ def refresh_bills_categories(bills, use_ai):
             purchase_date = transaction["purchase_date"]
 
             matched = False
-            for substring, label in categories_dict.items():
-                if substring.lower() in description.lower():
+            for keyword, label in categories_dict.items():
+                if keyword.lower() in description.lower():
                     transaction["category"] = label
                     print(f' - Transaction #{i+1} categorized with {label} - {description} / R${amount}')
                     matched = True
@@ -75,8 +75,8 @@ def _category_processment(counter, transaction, categories_dict, fields_map, use
     value = transaction[fields_map["value_field_label"]]
     purchase_date = transaction[fields_map["date_field_label"]]
     
-    for substring, label in categories_dict.items():
-        if substring.lower() in description.lower():
+    for keyword, label in categories_dict.items():
+        if keyword.lower() in description.lower():
             print(f'   - Transaction #{counter} categorized with {label} - {description} / R${value}')
             return label
     if not use_ai:
