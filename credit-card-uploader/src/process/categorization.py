@@ -3,13 +3,10 @@ from difflib import SequenceMatcher
 import process.ai.ai as ai
 import db.db_client as db_client
 
-manual_categorization_counter = 0
-ai_categorization_counter = 0
 
 def categorize_transaction(counter, transaction_description, transaction_amount, transaction_date, categories_dict, use_ai):
     description = _clean_description(transaction_description)
     category = ""
-    global manual_categorization_counter
 
     for keyword, label in categories_dict.items():
         # Keyword contains description
@@ -31,16 +28,12 @@ def categorize_transaction(counter, transaction_description, transaction_amount,
 
     if category != "":
          print(f" - Transaction #{counter} '{description}' - Matched as pre-saved category: {category}")
-         global manual_categorization_counter
-         manual_categorization_counter += 1
     else:
          if use_ai:
             category = ai.ai_categorize_transaction(description, transaction_amount, transaction_date)
             db_client.db_append_ai_category(category, description)
             categories_dict[description] = category 
             print(f" - Transaction #{counter} '{description}' - Categorized with AI as: {category}")
-            global ai_categorization_counter
-            ai_categorization_counter += 1
 
     return category
 

@@ -23,8 +23,8 @@ def ai_categorize_transaction(transaction_description, value, date):
     )
 
     category = completion.choices[0].message.content
-    
-    normalized_category = category.strip().split(" ")[0]
+    normalized_category = _normalize_category(category)
+
     _update_dict_file(normalized_category, transaction_description)
     return normalized_category
 
@@ -60,6 +60,13 @@ def _get_weekday(date_str: str) -> str:
     date_obj = datetime.strptime(date_str, "%d/%m/%Y")
     return date_obj.strftime("%A")
 
+
+def _normalize_category(category):
+    normalized_category = category.strip().split(" ")[0]
+    if normalized_category not in VALID_CATEGORIES:
+        print(f" - AI category {normalized_category} not in {VALID_CATEGORIES}")
+        return "Other"
+    return normalized_category
 
 def _update_dict_file(category, transaction_description):
     categories = _get_ai_categories_from_file()
