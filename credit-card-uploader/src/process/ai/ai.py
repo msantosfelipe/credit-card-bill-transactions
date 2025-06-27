@@ -4,7 +4,16 @@ from datetime import datetime
 
 
 CATEGORIES_AI_FILE_PATH = os.environ.get("CATEGORIES_AI_FILE_PATH")
-VALID_CATEGORIES = ["Transport, Food, Market, Drugstore, Entertainment, Education, Healthcare, Other"]
+VALID_CATEGORIES = [
+    "Transport", 
+    "Food", 
+    "Market", 
+    "Drugstore", 
+    "Entertainment", 
+    "Education", 
+    "Healthcare", 
+    "Other",
+]
 
 
 def ai_categorize_transaction(transaction_description, value, date):

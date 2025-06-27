@@ -57,9 +57,13 @@ def db_append_ai_category(category, description):
     if db_category is None:
         db_client[COLLECTION_CATEGORIES].insert_one({
             "name" : category,
-            "keyworkds" : [description]
+            "keywords" : [description]
         })
-        return
+    else:
+        db_client[COLLECTION_CATEGORIES].update_one(
+            {'name': category},
+            {'$addToSet': {'keywords': description}}
+        )
     
 
 def db_update_categories_hash(hash):
