@@ -26,14 +26,14 @@ def categorize_transaction(counter, transaction_description, transaction_amount,
                 highest_similarity = similarity
                 category = label
 
-    if category != "":
-         print(f" - Transaction #{counter} '{description}' - Matched as pre-saved category: {category}")
-    else:
+    if category == "":
          if use_ai:
             category = ai.ai_categorize_transaction(description, transaction_amount, transaction_date)
             db_client.db_append_ai_category(category, description)
             categories_dict[description] = category 
             print(f" - Transaction #{counter} '{description}' - Categorized with AI as: {category}")
+    else:
+        print(f" - Transaction #{counter} '{description}' - Matched as pre-saved category: {category}")
 
     return category
 
