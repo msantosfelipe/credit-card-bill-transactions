@@ -121,7 +121,7 @@ def _build_payload_c6(file_data, categories_dict, use_ai):
         data.append({
             "purchase_date" : transaction["Data de Compra"],
             "card_holder": transaction["Nome no Cartão"],
-            "card_digits": transaction["Final do Cartão"],
+            "card_digits": str(transaction["Final do Cartão"]),
             "description": transaction["Descrição"],
             "amount": transaction["Valor (em R$)"],
             "installment": transaction["Parcela"] if (transaction["Parcela"] != "Única") else "-",
@@ -156,7 +156,7 @@ def _build_payload_xp(file_data, categories_dict, use_ai):
             "card_holder": transaction["Portador"],
             "card_digits": "",
             "description": transaction["Estabelecimento"],
-            "amount": transaction["Valor"],
+            "amount": _convert_amount_to_float(transaction["Valor"]),
             "installment": str(transaction["Parcela"]).replace(" de ", "/"),
             "category": _category_processment(i+1, transaction, categories_dict, _get_category_fields_map("xp"), use_ai),
         })
@@ -165,3 +165,6 @@ def _build_payload_xp(file_data, categories_dict, use_ai):
         "bank" : "xp",
         "data" : data,
     }
+
+def _convert_amount_to_float(amount_str):
+    return float(amount_str.replace("R$", "").strip().replace(".", "").replace(",", "."))
