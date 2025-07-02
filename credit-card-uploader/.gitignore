@@ -5,3 +5,4 @@ data/creds
 data/tmp_files/*
 data/categories.json
 data/categories_ai.json
+data/categories_ai copy.json

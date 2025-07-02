@@ -49,6 +49,10 @@ func (repo *repository) QueryBillsByDate(ctx context.Context, dateInit, dateEnd 
 		return nil, err
 	}
 
+	if len(bills) == 0 {
+		return []domain.Bill{}, nil
+	}
+
 	return bills, nil
 }
 
