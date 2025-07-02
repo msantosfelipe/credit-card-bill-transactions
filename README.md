@@ -1,7 +1,5 @@
 # Credit card bill reader/uploader
 
-- Work in progress...
-
 ### Uploader
 Subdirectory ./credit-card-uploader
 
