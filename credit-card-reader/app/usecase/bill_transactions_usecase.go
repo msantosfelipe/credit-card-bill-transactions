@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/msantosfelipe/credit-card-reader/config"
@@ -40,6 +41,38 @@ func (us *usecase) GetBillsByDate(dateInit, dateEnd string) ([]domain.Bill, erro
 	defer cancel()
 
 	return us.repository.QueryBillsByDate(ctx, dateInit, dateEnd)
+}
+
+func (us *usecase) GetBillsByDateAndCategory(dateInit, dateEnd string) ([]domain.CategoryGroup, error) {
+	bills, err := us.GetBillsByDate(dateInit, dateEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	groupMap := make(map[string][]domain.CategoryTransaction)
+	for _, bill := range bills {
+		for _, transaction := range bill.Data {
+			key := bill.FileDate + "::" + transaction.Category
+
+			groupMap[key] = append(groupMap[key], domain.CategoryTransaction{
+				Bank:        bill.Bank,
+				Description: transaction.Description,
+				Amount:      transaction.Amount,
+				Installment: transaction.Installment,
+			})
+		}
+	}
+	result := make([]domain.CategoryGroup, 0, len(groupMap))
+	for key, transactions := range groupMap {
+		parts := strings.Split(key, "::")
+		result = append(result, domain.CategoryGroup{
+			FileDate: parts[0],
+			Category: parts[1],
+			Data:     transactions,
+		})
+	}
+
+	return result, nil
 }
 
 func (us *usecase) GetInstallmentTransactions() ([]domain.Installment, error) {

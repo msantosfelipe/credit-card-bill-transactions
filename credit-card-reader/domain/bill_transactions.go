@@ -35,11 +35,25 @@ type InstallmentTransaction struct {
 	Category    string  `json:"category" bson:"category"`
 }
 
+type CategoryGroup struct {
+	FileDate string                `json:"file_date"`
+	Category string                `json:"category"`
+	Data     []CategoryTransaction `json:"data"`
+}
+
+type CategoryTransaction struct {
+	Bank        string  `json:"bank"`
+	Description string  `json:"description"`
+	Amount      float64 `json:"amount"`
+	Installment string  `json:"installment"`
+}
+
 // Usecase definitions
 
 type BillTransactionsUsecase interface {
 	GetRecentBills() ([]Bill, error)
 	GetBillsByDate(dateInit, dateEnd string) ([]Bill, error)
+	GetBillsByDateAndCategory(dateInit, dateEnd string) ([]CategoryGroup, error)
 	GetInstallmentTransactions() ([]Installment, error)
 }
 

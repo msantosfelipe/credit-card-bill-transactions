@@ -18,6 +18,7 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 
 	router.GET("/recent", handler.GetRecentBills)
 	router.GET("/bills", handler.GetBillsByDate)
+	router.GET("/categories", handler.GetBillsByDateAndCategory)
 	router.GET("/installments", handler.getInstallmentTransactions)
 }
 
@@ -41,6 +42,24 @@ func (handler *handler) GetBillsByDate(ctx *gin.Context) {
 	}
 
 	bills, err := handler.us.GetBillsByDate(dateInit, dateEnd)
+	if err != nil {
+		println(err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
+		return
+	}
+	ctx.JSON(http.StatusOK, bills)
+}
+
+func (handler *handler) GetBillsByDateAndCategory(ctx *gin.Context) {
+	dateInit := ctx.Query("dateInit")
+	dateEnd := ctx.Query("dateEnd")
+
+	if dateInit == "" || dateEnd == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "dateInit and dateEnd query parameters are required (YYYY-mm format)"})
+		return
+	}
+
+	bills, err := handler.us.GetBillsByDateAndCategory(dateInit, dateEnd)
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
