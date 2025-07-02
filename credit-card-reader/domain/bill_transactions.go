@@ -39,11 +39,13 @@ type InstallmentTransaction struct {
 
 type BillTransactionsUsecase interface {
 	GetRecentBills() ([]Bill, error)
+	GetBillsByDate(dateInit, dateEnd string) ([]Bill, error)
 	GetInstallmentTransactions() ([]Installment, error)
 }
 
 // Repository definitions
 
 type BillTransactionsRepository interface {
+	QueryBillsByDate(ctx context.Context, dateInit, dateEnd string) ([]Bill, error)
 	QueryLatestBillsByBank(ctx context.Context) ([]Bill, error)
 }

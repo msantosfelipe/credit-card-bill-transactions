@@ -35,6 +35,13 @@ func (us *usecase) GetRecentBills() ([]domain.Bill, error) {
 	return validBills, nil
 }
 
+func (us *usecase) GetBillsByDate(dateInit, dateEnd string) ([]domain.Bill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetContextTimeout())
+	defer cancel()
+
+	return us.repository.QueryBillsByDate(ctx, dateInit, dateEnd)
+}
+
 func (us *usecase) GetInstallmentTransactions() ([]domain.Installment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), config.GetContextTimeout())
 	defer cancel()

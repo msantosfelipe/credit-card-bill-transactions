@@ -22,13 +22,37 @@ func NewRepository(dbClient *mongo.Client) domain.BillTransactionsRepository {
 	return &repository{dbClient: dbClient}
 }
 
-func (repo *repository) getCollection(bank string) *mongo.Collection {
-	return repo.dbClient.Database(config.ENV.DbName).Collection(bank)
+func (repo *repository) QueryBillsByDate(ctx context.Context, dateInit, dateEnd string) ([]domain.Bill, error) {
+	pipeline := mongo.Pipeline{
+		bson.D{{Key: "$match", Value: bson.M{
+			"file_date": bson.M{
+				"$gte": dateInit,
+				"$lte": dateEnd,
+			},
+		}}},
+		bson.D{{Key: "$sort", Value: bson.D{
+			{Key: "bank", Value: 1},
+			{Key: "file_date", Value: -1},
+		}}},
+	}
+
+	collection := repo.getCollection(bills_collection)
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var bills []domain.Bill
+	if err := cursor.All(ctx, &bills); err != nil {
+		return nil, err
+	}
+
+	return bills, nil
 }
 
 func (repo *repository) QueryLatestBillsByBank(ctx context.Context) ([]domain.Bill, error) {
-	collection := repo.getCollection(bills_collection)
-
 	pipeline := mongo.Pipeline{
 		{{Key: "$sort", Value: bson.D{{Key: "bank", Value: 1}, {Key: "file_date", Value: -1}}}},
 		{{Key: "$group", Value: bson.D{
@@ -37,6 +61,7 @@ func (repo *repository) QueryLatestBillsByBank(ctx context.Context) ([]domain.Bi
 		}}},
 	}
 
+	collection := repo.getCollection(bills_collection)
 	cursor, err := collection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
@@ -57,4 +82,8 @@ func (repo *repository) QueryLatestBillsByBank(ctx context.Context) ([]domain.Bi
 	}
 
 	return bills, nil
+}
+
+func (repo *repository) getCollection(bank string) *mongo.Collection {
+	return repo.dbClient.Database(config.ENV.DbName).Collection(bank)
 }
