@@ -13,6 +13,6 @@ Subdirectory ./credit-card-reader
 Golang service to read data
 
 ## How to run
+- Build image: `cd ./credit-card-reader` and `make build-app`
 - Start database `make up`
 - Upload data to database following [this instructions](https://github.com/msantosfelipe/credit-card-bill-transactions/tree/main/credit-card-uploader#readme)
-- Start API running `make reader`

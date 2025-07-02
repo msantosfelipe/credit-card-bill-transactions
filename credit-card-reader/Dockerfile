@@ -1,4 +1,3 @@
-# Etapa de build
 FROM golang:1.21.6 AS builder
 WORKDIR /app
 

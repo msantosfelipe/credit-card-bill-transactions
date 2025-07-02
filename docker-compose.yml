@@ -1,4 +1,17 @@
 services:
+  app:
+    image: credit-card-reader:latest
+    container_name: credit_card_reader_app
+    environment:
+      API_PORT: 8081
+      API_BASE_PATH: credit-card-reader
+      DB_URI: mongodb://credit_card_reader_mongo:27017
+      DB_NAME: credit-card-bill-transactions
+    ports:
+      - "8081:8081"
+    depends_on:
+      - credit_card_reader_mongo
+
   credit_card_reader_mongo:
     container_name: credit_card_reader_mongo
     image: bitnami/mongodb:6.0
