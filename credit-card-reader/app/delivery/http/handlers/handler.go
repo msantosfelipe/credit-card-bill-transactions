@@ -16,28 +16,50 @@ func NewHandler(router *gin.RouterGroup, us domain.BillTransactionsUsecase) {
 		us: us,
 	}
 
-	router.GET("/bill", handler.getRecentBill)
-	router.GET("/bills", handler.getAllBills)
+	router.GET("/recent", handler.GetRecentBills)
+	router.GET("/bills", handler.GetBillsByDate)
+	router.GET("/categories", handler.GetBillsByDateAndCategory)
 	router.GET("/installments", handler.getInstallmentTransactions)
-	router.GET("/categories", handler.getTransactionsByCategory)
-	router.GET("/tags", handler.getTransactionsByTag)
-	router.GET("/report/tag", handler.getReportByTag)
 }
 
-func (handler *handler) getRecentBill(ctx *gin.Context) {
-	// TODO add month parameter
-
-	recentBill, err := handler.us.GetRecentBill("c6")
+func (handler *handler) GetRecentBills(ctx *gin.Context) {
+	bills, err := handler.us.GetRecentBills()
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
 		return
 	}
-	ctx.JSON(http.StatusOK, recentBill)
+	ctx.JSON(http.StatusOK, bills)
 }
 
-func (handler *handler) getAllBills(ctx *gin.Context) {
-	bills, err := handler.us.GetAllBills([]string{"c6"})
+func (handler *handler) GetBillsByDate(ctx *gin.Context) {
+	dateInit := ctx.Query("dateInit")
+	dateEnd := ctx.Query("dateEnd")
+
+	if dateInit == "" || dateEnd == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "dateInit and dateEnd query parameters are required (YYYY-mm format)"})
+		return
+	}
+
+	bills, err := handler.us.GetBillsByDate(dateInit, dateEnd)
+	if err != nil {
+		println(err.Error())
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
+		return
+	}
+	ctx.JSON(http.StatusOK, bills)
+}
+
+func (handler *handler) GetBillsByDateAndCategory(ctx *gin.Context) {
+	dateInit := ctx.Query("dateInit")
+	dateEnd := ctx.Query("dateEnd")
+
+	if dateInit == "" || dateEnd == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "dateInit and dateEnd query parameters are required (YYYY-mm format)"})
+		return
+	}
+
+	bills, err := handler.us.GetBillsByDateAndCategory(dateInit, dateEnd)
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
@@ -47,41 +69,11 @@ func (handler *handler) getAllBills(ctx *gin.Context) {
 }
 
 func (handler *handler) getInstallmentTransactions(ctx *gin.Context) {
-	transactions, err := handler.us.GetInstallmentTransactions("c6")
+	installments, err := handler.us.GetInstallmentTransactions()
 	if err != nil {
 		println(err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
 		return
 	}
-	ctx.JSON(http.StatusOK, transactions)
-}
-
-func (handler *handler) getTransactionsByCategory(ctx *gin.Context) {
-	categories, err := handler.us.GetTransactionsByCategory("c6")
-	if err != nil {
-		println(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
-		return
-	}
-	ctx.JSON(http.StatusOK, categories)
-}
-
-func (handler *handler) getTransactionsByTag(ctx *gin.Context) {
-	categories, err := handler.us.GetTransactionsByTag("c6")
-	if err != nil {
-		println(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
-		return
-	}
-	ctx.JSON(http.StatusOK, categories)
-}
-
-func (handler *handler) getReportByTag(ctx *gin.Context) {
-	reports, err := handler.us.GetReportByTag("c6")
-	if err != nil {
-		println(err.Error())
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query MongoDB"})
-		return
-	}
-	ctx.JSON(http.StatusOK, reports)
+	ctx.JSON(http.StatusOK, installments)
 }

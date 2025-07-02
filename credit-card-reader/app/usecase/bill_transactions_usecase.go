@@ -2,9 +2,10 @@ package usecase
 
 import (
 	"context"
-	"math"
+	"strings"
 	"time"
 
+	"github.com/msantosfelipe/credit-card-reader/config"
 	"github.com/msantosfelipe/credit-card-reader/domain"
 )
 
@@ -16,219 +17,113 @@ func NewUsecase(repository domain.BillTransactionsRepository) domain.BillTransac
 	return &usecase{repository: repository}
 }
 
-func (us *usecase) GetAllBills(banks []string) ([]domain.Bills, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (us *usecase) GetRecentBills() ([]domain.Bill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetContextTimeout())
 	defer cancel()
 
-	billsAmounts := []domain.Bills{}
-	for _, bank := range banks {
-		bills, err := us.repository.QueryAllBills(ctx, bank)
-		if err != nil {
-			return nil, err
-		}
+	latestBills, err := us.repository.QueryLatestBillsByBank(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-		billsAmounts = append(billsAmounts, domain.Bills{
-			Bank:  bank,
-			Bills: bills,
+	validBills := []domain.Bill{}
+	for _, bill := range latestBills {
+		if isWithinLast3Months(bill.FileDate) {
+			validBills = append(validBills, bill)
+		}
+	}
+
+	return validBills, nil
+}
+
+func (us *usecase) GetBillsByDate(dateInit, dateEnd string) ([]domain.Bill, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetContextTimeout())
+	defer cancel()
+
+	return us.repository.QueryBillsByDate(ctx, dateInit, dateEnd)
+}
+
+func (us *usecase) GetBillsByDateAndCategory(dateInit, dateEnd string) ([]domain.CategoryGroup, error) {
+	bills, err := us.GetBillsByDate(dateInit, dateEnd)
+	if err != nil {
+		return nil, err
+	}
+
+	groupMap := make(map[string][]domain.CategoryTransaction)
+	for _, bill := range bills {
+		for _, transaction := range bill.Data {
+			key := bill.FileDate + "::" + transaction.Category
+
+			groupMap[key] = append(groupMap[key], domain.CategoryTransaction{
+				Bank:        bill.Bank,
+				Description: transaction.Description,
+				Amount:      transaction.Amount,
+				Installment: transaction.Installment,
+			})
+		}
+	}
+	result := make([]domain.CategoryGroup, 0, len(groupMap))
+	for key, transactions := range groupMap {
+		parts := strings.Split(key, "::")
+		result = append(result, domain.CategoryGroup{
+			FileDate: parts[0],
+			Category: parts[1],
+			Data:     transactions,
 		})
 	}
 
-	return billsAmounts, nil
+	return result, nil
 }
 
-func (us *usecase) GetRecentBill(bank string) (*domain.Bill, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (us *usecase) GetInstallmentTransactions() ([]domain.Installment, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), config.GetContextTimeout())
 	defer cancel()
 
-	return us.repository.QueryRecentBill(ctx, bank)
-}
-
-func (us *usecase) GetInstallmentTransactions(bank string) (*domain.Installment, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
+	latestBills, err := us.repository.QueryLatestBillsByBank(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	installments := domain.Installment{
-		FileDate: recentBill.FileDate,
-	}
-	amount := float64(0)
-	for _, i := range recentBill.Data {
-		if isInstallment(i, bank) {
-			installments.Data = append(installments.Data, i)
-			amount = addWithPrecision(amount, i.AmountBRL)
-		}
-	}
-
-	installments.Amount = amount
-	return &installments, nil
-}
-
-func (us *usecase) GetTransactionsByCategory(bank string) (*domain.CategoriesBill, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
-	if err != nil {
-		return nil, err
-	}
-
-	categories := domain.CategoriesBill{
-		FileDate: recentBill.FileDate,
-	}
-	for _, i := range recentBill.Data {
-		exists, idx := categoryExists(i.Category, categories.Data)
-		if exists {
-			categories.Data[idx].Transactions = append(categories.Data[idx].Transactions, i)
-			categories.Data[idx].Amount = addWithPrecision(categories.Data[idx].Amount, i.AmountBRL)
-		} else {
-			categories.Data = append(categories.Data, domain.CategoryBill{
-				Category:     i.Category,
-				Amount:       float64(i.AmountBRL),
-				Transactions: []domain.Transaction{i},
-			})
-		}
-	}
-
-	return &categories, err
-}
-
-func (us *usecase) GetTransactionsByTag(bank string) (*domain.CategoriesBill, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	recentBill, err := us.repository.QueryRecentBill(ctx, bank)
-	if err != nil {
-		return nil, err
-	}
-
-	tags := domain.CategoriesBill{
-		FileDate: recentBill.FileDate,
-	}
-	for _, i := range recentBill.Data {
-		if i.Description == "Estorno Tarifa" {
+	installments := []domain.Installment{}
+	for _, bill := range latestBills {
+		if !isWithinLast3Months(bill.FileDate) {
 			continue
 		}
 
-		if i.Tag == "" {
-			i.Tag = i.Category
+		installmentTransaction := []domain.InstallmentTransaction{}
+		for _, transaction := range bill.Data {
+			if isInstallment(transaction) {
+				installmentTransaction = append(installmentTransaction, domain.InstallmentTransaction{
+					Description: transaction.Description,
+					Amount:      transaction.Amount,
+					Installment: transaction.Installment,
+					Category:    transaction.Category,
+				})
+			}
 		}
 
-		exists, idx := isTagMapped(i.Tag, tags.Data)
-		if exists {
-			tags.Data[idx].Transactions = append(tags.Data[idx].Transactions, i)
-			tags.Data[idx].Amount = addWithPrecision(tags.Data[idx].Amount, i.AmountBRL)
-
-		} else {
-			tags.Data = append(tags.Data, domain.CategoryBill{
-				Tag:          i.Tag,
-				Amount:       float64(i.AmountBRL),
-				Transactions: []domain.Transaction{i},
+		if len(installmentTransaction) > 0 {
+			installments = append(installments, domain.Installment{
+				FileDate: bill.FileDate,
+				Bank:     bill.Bank,
+				Data:     installmentTransaction,
 			})
 		}
 	}
 
-	return &tags, err
+	return installments, nil
 }
 
-func (us *usecase) GetReportByTag(bank string) ([]domain.ReportByTag, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func isInstallment(transaction domain.Transaction) bool {
+	return transaction.Installment != "-"
+}
 
-	bills, err := us.repository.QueryAllBills(ctx, bank)
+func isWithinLast3Months(fileDate string) bool {
+	parsedDate, err := time.Parse("2006-01", fileDate)
 	if err != nil {
-		return nil, err
+		return false
 	}
 
-	var report []domain.ReportByTag
-	for _, b := range bills {
-		for _, t := range b.Data {
-			if t.Category == "-" {
-				continue
-			}
-
-			if t.Tag == "" {
-				t.Tag = t.Category
-			}
-
-			exists, idx := isTagMappedInReport(t.Tag, report)
-			if exists {
-				monthExists, monthIdx := isMonthMappedInReport(b.FileDate, report[idx].Report)
-				if monthExists {
-					report[idx].Report[monthIdx].Amount = addWithPrecision(report[idx].Report[monthIdx].Amount, t.AmountBRL)
-				} else {
-					report[idx].Report = append(report[idx].Report, domain.Report{
-						FileDate: b.FileDate,
-						Amount:   t.AmountBRL,
-					})
-				}
-
-			} else {
-				report = append(report, domain.ReportByTag{
-					Tag: t.Tag,
-					Report: []domain.Report{
-						{
-							FileDate: b.FileDate,
-							Amount:   t.AmountBRL,
-						},
-					},
-				})
-			}
-		}
-	}
-
-	return report, err
-}
-
-func isMonthMappedInReport(fileDate string, report []domain.Report) (bool, int) {
-	for idx, i := range report {
-		if i.FileDate == fileDate {
-			return true, idx
-		}
-	}
-	return false, 0
-}
-
-func isTagMappedInReport(tag string, data []domain.ReportByTag) (bool, int) {
-	for idx, i := range data {
-		if i.Tag == tag {
-			return true, idx
-		}
-	}
-	return false, 0
-}
-
-func categoryExists(category string, data []domain.CategoryBill) (bool, int) {
-	for idx, i := range data {
-		if i.Category == category {
-			return true, idx
-		}
-	}
-	return false, 0
-}
-
-func isTagMapped(tag string, data []domain.CategoryBill) (bool, int) {
-	for idx, i := range data {
-		if i.Tag == tag {
-			return true, idx
-		}
-	}
-	return false, 0
-}
-
-func isInstallment(i domain.Transaction, bank string) bool {
-	if bank == "c6" {
-		return i.Installment != "Única" && i.Tag != "Subscriptions" && i.Description != "Anuidade Diferenciada"
-	} else {
-		return i.Installment != "-"
-	}
-}
-
-func addWithPrecision(a, b float64) float64 {
-	result := a + b
-	roundedResult := math.Round(result*100) / 100
-	return roundedResult
+	limitDate := time.Now().AddDate(0, -3, 0)
+	return !parsedDate.Before(limitDate)
 }

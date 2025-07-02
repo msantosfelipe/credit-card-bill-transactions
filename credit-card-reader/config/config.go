@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"time"
 
 	"github.com/Netflix/go-env"
 	"github.com/subosito/gotenv"
@@ -24,4 +25,8 @@ func init() {
 	if _, err := env.UnmarshalFromEnviron(&ENV); err != nil {
 		log.Fatal("Fatal error unmarshalling environment config: ", err)
 	}
+}
+
+func GetContextTimeout() time.Duration {
+	return 5 * time.Second
 }
