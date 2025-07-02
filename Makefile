@@ -6,6 +6,3 @@ down:
 
 reader:
 	cd credit-card-reader/ && go run .
-
-viewer:
-	cd credit-card-viewer/ && npm start
