@@ -5,10 +5,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/msantosfelipe/credit-card-reader/app/delivery/http/router"
-	repository "github.com/msantosfelipe/credit-card-reader/app/repository/db"
-	"github.com/msantosfelipe/credit-card-reader/app/usecase"
-	"github.com/msantosfelipe/credit-card-reader/infrastructure/db"
+	"github.com/msantosfelipe/credit-card-reader/internal/delivery/http"
+	"github.com/msantosfelipe/credit-card-reader/internal/infrastructure/db"
+	repository "github.com/msantosfelipe/credit-card-reader/internal/repository/db"
+	"github.com/msantosfelipe/credit-card-reader/internal/usecase"
 )
 
 func main() {
@@ -22,5 +22,5 @@ func main() {
 	repo := repository.NewRepository(dbClient)
 	us := usecase.NewUsecase(repo)
 
-	router.InitHttpRouters(us)
+	http.InitHttpRouters(us)
 }
