@@ -118,6 +118,8 @@ def _extract_date_c6(tmp_file_name):
 def _build_payload_c6(file_data, categories_dict, use_ai):
     data = []
     for i, transaction in enumerate(file_data["data"]):
+        if _ignore_payment_transaction(transaction["Descrição"]):
+            continue
         data.append({
             "purchase_date" : transaction["Data de Compra"],
             "card_holder": transaction["Nome no Cartão"],
@@ -151,6 +153,8 @@ def _extract_date_xp(tmp_file_name):
 def _build_payload_xp(file_data, categories_dict, use_ai):
     data = []
     for i, transaction in enumerate(file_data["data"]):
+        if _ignore_payment_transaction(transaction["Estabelecimento"]):
+            continue
         data.append({
             "purchase_date" : transaction["Data"],
             "card_holder": transaction["Portador"],
@@ -168,3 +172,10 @@ def _build_payload_xp(file_data, categories_dict, use_ai):
 
 def _convert_amount_to_float(amount_str):
     return float(amount_str.replace("R$", "").strip().replace(".", "").replace(",", "."))
+
+def _ignore_payment_transaction(description):
+    return description.strip() in [
+        "Pagamentos Validos Normais",
+        "Pagamento Fatura QR CODE",
+        "Pagamento Efetuado"
+    ]
