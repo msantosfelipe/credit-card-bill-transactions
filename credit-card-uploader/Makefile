@@ -1,8 +1,8 @@
 up:
-	docker compose up -d
+	cd ../ && docker compose up -d
 
 down:
-	docker compose down
+	cd ../ && docker compose down
 
 up-ai:
 	ollama run mistral
